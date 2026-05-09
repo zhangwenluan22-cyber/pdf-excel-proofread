@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF × Excel 人工校对台</title>
+  <style>
+    :root {
+      --bg1: #f7f1e6;
+      --bg2: #e7d8c2;
+      --panel: #fffaf2;
+      --line: #d9c7ae;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #0f766e;
+      --ok: #166534;
+      --warn: #b45309;
+      --low: #b91c1c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: radial-gradient(circle at 0% 0%, #fff7ec 0%, transparent 30%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+    }
+    .shell {
+      width: min(1800px, calc(100vw - 24px));
+      margin: 12px auto 18px;
+      display: grid;
+      gap: 12px;
+    }
+    .panel {
+      background: rgba(255, 250, 242, 0.96);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+    }
+    .toolbar {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 10px;
+    }
+    .box {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel);
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    input[type="file"] { display: none; }
+    button, .btn-link {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      background: #efe2ce;
+      color: #694d2d;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+    }
+    button.primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .muted { color: var(--muted); }
+    .status {
+      font-size: 13px;
+      padding: 7px 9px;
+      border-radius: 10px;
+      background: #eaf4f3;
+      border: 1px solid #c8dfdc;
+      color: #24515a;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      padding: 8px;
+    }
+    .stat small { color: var(--muted); font-weight: 700; }
+    .stat strong { display: block; font-size: 24px; margin-top: 4px; }
+    .content {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(420px, 1fr);
+      gap: 10px;
+      min-height: 68vh;
+    }
+    .content > section {
+      min-width: 0;
+    }
+    .table-wrap {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: auto;
+      background: #fff;
+      max-height: 68vh;
+    }
+    .hierarchy-wrap {
+      display: grid;
+      gap: 10px;
+      padding: 10px;
+    }
+    .group-card, .middle-card, .entry-card {
+      border: 1px solid #eadcc8;
+      border-radius: 10px;
+      padding: 8px;
+    }
+    .group-card {
+      background: #fff8ee;
+      border-left: 6px solid #0f766e;
+    }
+    .middle-card {
+      background: #fffdf8;
+      border-left: 4px solid #c27c2c;
+      margin-top: 8px;
+      margin-left: 10px;
+    }
+    .entry-card {
+      background: #ffffff;
+      border-left: 3px solid #7c8aa0;
+      margin-top: 8px;
+      margin-left: 18px;
+    }
+    .mid-inline {
+      border: 1px solid #e9dcc9;
+      border-radius: 8px;
+      background: #fff;
+      margin-top: 8px;
+      padding: 8px;
+    }
+    .group-card > summary,
+    .middle-card > summary,
+    .entry-card > summary {
+      list-style: none;
+      cursor: pointer;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .group-card > summary {
+      font-size: 17px;
+      color: #0f4f49;
+      padding: 2px 0;
+    }
+    .middle-card > summary {
+      font-size: 15px;
+      color: #7a4a18;
+      padding: 2px 0;
+    }
+    .entry-card > summary {
+      font-size: 14px;
+      color: #334155;
+      padding: 1px 0;
+    }
+    .group-card > summary::-webkit-details-marker,
+    .middle-card > summary::-webkit-details-marker,
+    .entry-card > summary::-webkit-details-marker { display: none; }
+    .count {
+      font-size: 12px;
+      color: #6b7280;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid #e7d8c3;
+      border-radius: 999px;
+      padding: 2px 8px;
+    }
+    .entry-meta {
+      display: grid;
+      grid-template-columns: 110px 124px 1fr;
+      gap: 8px;
+      margin-top: 8px;
+      align-items: start;
+    }
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .field {
+      border: 1px solid #efe2cf;
+      border-radius: 8px;
+      padding: 6px;
+      background: #fff;
+      font-size: 12px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .field .k {
+      color: #6b7280;
+      font-size: 11px;
+      margin-bottom: 2px;
+      font-weight: 700;
+    }
+    .badge {
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 12px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+    }
+    .high { background: #e8f7ea; color: var(--ok); }
+    .medium { background: #fff1de; color: var(--warn); }
+    .low { background: #fdeaea; color: var(--low); }
+    .na { background: #edf0f5; color: #475569; }
+    .status-select, .note-input {
+      width: 100%;
+      border: 1px solid #d9c7ae;
+      border-radius: 8px;
+      padding: 4px 6px;
+      font: inherit;
+      background: #fff;
+    }
+    .status-select {
+      min-width: 92px;
+      max-width: 100px;
+      font-size: 12px;
+      padding: 4px;
+    }
+    .note-input {
+      min-width: 96px;
+      max-width: 108px;
+      min-height: 56px;
+      max-height: 56px;
+      resize: none;
+      font-size: 12px;
+      line-height: 1.35;
+      padding: 6px;
+    }
+    .side {
+      display: grid;
+      gap: 10px;
+      min-height: 0;
+    }
+    .detail, .pdf-box {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel);
+      padding: 10px;
+    }
+    .kv {
+      margin-top: 8px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .pdf-frame-wrap {
+      margin-top: 8px;
+      border: 1px solid #e8d8c3;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fff;
+    }
+    iframe {
+      display: block;
+      width: 100%;
+      height: 72vh;
+      min-height: 640px;
+      border: 0;
+    }
+    @media (max-width: 1200px) {
+      .toolbar, .content, .stats { grid-template-columns: 1fr; }
+      iframe {
+        height: 68vh;
+        min-height: 520px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="panel">
+      <h1 style="margin:0;">PDF × Excel 人工校对台</h1>
+      <div class="muted" style="margin-top:6px;">保留 Excel 全表头与原始内容，右侧直接预览 PDF，不做自动文本解析。</div>
+      <div class="toolbar" style="margin-top:10px;">
+        <div class="box">
+          <div class="row">
+            <input id="excelInput" type="file" accept=".xlsx,.xlsm" />
+            <button id="excelBtn">选择 Excel</button>
+            <span id="excelName" class="muted">未选择</span>
+          </div>
+          <div class="row">
+            <input id="pdfInput" type="file" accept=".pdf" />
+            <button id="pdfBtn">选择 PDF</button>
+            <span id="pdfName" class="muted">未选择</span>
+          </div>
+          <div class="row">
+            <button id="compareBtn" class="primary" disabled>加载并开始校对</button>
+            <button id="exportErrorBtn" disabled>导出有错误行（CSV）</button>
+          </div>
+        </div>
+        <div class="box">
+          <div id="statusText" class="status">等待上传 Excel 与 PDF。</div>
+          <div class="stats">
+            <div class="stat"><small>数据行</small><strong id="statRows">0</strong></div>
+            <div class="stat"><small>表头列数</small><strong id="statHeaders">0</strong></div>
+            <div class="stat"><small>有错误行</small><strong id="statErrorRows">0</strong></div>
+            <div class="stat"><small>PDF状态</small><strong id="statPdf">未加载</strong></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="content">
+      <section class="panel">
+        <h2 style="margin:0;">Excel 全表头保留视图</h2>
+        <div class="muted" style="margin:6px 0 10px;">按大条目分组展开，便于逐条校对与内容确认。</div>
+        <div class="table-wrap">
+          <div id="hierarchyView" class="hierarchy-wrap"></div>
+        </div>
+      </section>
+
+      <section class="side">
+        <section class="pdf-box">
+          <div class="row" style="justify-content:space-between;">
+            <h2 style="margin:0;">PDF 预览</h2>
+            <a id="openPdfBtn" class="btn-link" href="#" target="_blank" rel="noopener noreferrer">新窗口打开</a>
+          </div>
+          <div class="pdf-frame-wrap">
+            <iframe id="pdfFrame" title="PDF预览"></iframe>
+          </div>
+        </section>
+      </section>
+    </section>
+  </div>
+
+  <script>
+    const STATE = {
+      excelFile: null,
+      pdfFile: null,
+      headers: [],
+      rows: [],
+      selectedIndex: -1,
+      pdfToken: null
+    };
+
+    const excelInput = document.getElementById("excelInput");
+    const pdfInput = document.getElementById("pdfInput");
+    const excelBtn = document.getElementById("excelBtn");
+    const pdfBtn = document.getElementById("pdfBtn");
+    const compareBtn = document.getElementById("compareBtn");
+    const exportErrorBtn = document.getElementById("exportErrorBtn");
+    const excelName = document.getElementById("excelName");
+    const pdfName = document.getElementById("pdfName");
+    const statusText = document.getElementById("statusText");
+    const hierarchyView = document.getElementById("hierarchyView");
+    const pdfFrame = document.getElementById("pdfFrame");
+    const openPdfBtn = document.getElementById("openPdfBtn");
+    const API_BASE = `${window.location.protocol}//${window.location.host}`;
+    const HIDDEN_HEADERS = new Set(["PDF页码", "校对状态"]);
+
+    function setStatus(msg) {
+      statusText.textContent = msg;
+    }
+
+    function getVisibleHeaders() {
+      return STATE.headers.filter((h) => !HIDDEN_HEADERS.has(h));
+    }
+
+    function orderValue(raw) {
+      const text = String(raw || "").trim();
+      if (!text) return Number.MAX_SAFE_INTEGER;
+      const n = Number.parseFloat(text.replace(/[^\d.-]/g, ""));
+      return Number.isFinite(n) ? n : Number.MAX_SAFE_INTEGER;
+    }
+
+    function esc(v) {
+      return String(v ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function levelBadge(level) {
+      const safe = level || "na";
+      const text = safe === "high" ? "高匹配" : safe === "medium" ? "中匹配" : safe === "low" ? "低匹配" : "人工校对";
+      return `<span class="badge ${safe}">${text}</span>`;
+    }
+
+    function updateStats() {
+      const rows = STATE.rows;
+      document.getElementById("statRows").textContent = String(rows.length);
+      document.getElementById("statHeaders").textContent = String(getVisibleHeaders().length);
+      const errCount = STATE.rows.filter((r) => r.review_status === "有错误").length;
+      document.getElementById("statErrorRows").textContent = String(errCount);
+      document.getElementById("statPdf").textContent = STATE.pdfToken ? "已加载" : "未加载";
+    }
+
+    function renderHierarchy() {
+      hierarchyView.innerHTML = "";
+      const visibleHeaders = getVisibleHeaders();
+      if (!STATE.rows.length) {
+        hierarchyView.innerHTML = `<div class="field">暂无数据</div>`;
+        return;
+      }
+
+      const grouped = new Map();
+      STATE.rows.forEach((row, idx) => {
+        const cells = row.cells || {};
+        const big = (cells["大条目"] || "未分类大条目").trim() || "未分类大条目";
+        const mid = (cells["中条目"] || "").trim();
+        if (!grouped.has(big)) grouped.set(big, new Map());
+        const mids = grouped.get(big);
+        const midIndex = (cells["中条目序号"] || "").trim();
+        const midKey = mid ? `${midIndex}||${mid}` : "__BIG_LEVEL__";
+        if (!mids.has(midKey)) mids.set(midKey, { label: mid, midIndex, entries: [] });
+        mids.get(midKey).entries.push({ row, idx });
+      });
+
+      grouped.forEach((midMap, bigName) => {
+        const bigDetails = document.createElement("details");
+        bigDetails.className = "group-card";
+        bigDetails.open = true;
+        const totalCount = Array.from(midMap.values()).reduce((a, bucket) => a + bucket.entries.length, 0);
+        bigDetails.innerHTML = `<summary><span>${esc(bigName)}</span><span class="count">${totalCount} 条</span></summary>`;
+        const midEntries = Array.from(midMap.entries()).sort((a, b) => {
+          const [keyA, bucketA] = a;
+          const [keyB, bucketB] = b;
+          if (keyA === "__BIG_LEVEL__" && keyB !== "__BIG_LEVEL__") return -1;
+          if (keyB === "__BIG_LEVEL__" && keyA !== "__BIG_LEVEL__") return 1;
+          const iA = orderValue(bucketA.midIndex);
+          const iB = orderValue(bucketB.midIndex);
+          if (iA !== iB) return iA - iB;
+          return String(bucketA.label || "").localeCompare(String(bucketB.label || ""));
+        });
+
+        midEntries.forEach(([midKey, bucket]) => {
+          const { label: midName, entries } = bucket;
+
+          if (midKey === "__BIG_LEVEL__") {
+            entries.forEach(({ row, idx }) => {
+              const cells = row.cells || {};
+              const title = (cells["小条目"] || cells["中条目"] || cells["大条目"] || `行 ${row.row_number}`).trim();
+              const entry = document.createElement("details");
+              entry.className = "entry-card";
+              entry.open = idx === STATE.selectedIndex;
+              entry.innerHTML = `
+                <summary><span>${esc(title)}</span><span class="count">行 ${row.row_number}</span></summary>
+                <div class="entry-meta">
+                  <select class="status-select" data-idx="${idx}">
+                    <option value="待校对"${row.review_status === "待校对" ? " selected" : ""}>待校对</option>
+                    <option value="校对无误"${row.review_status === "校对无误" ? " selected" : ""}>校对无误</option>
+                    <option value="有错误"${row.review_status === "有错误" ? " selected" : ""}>有错误</option>
+                  </select>
+                  <textarea class="note-input" data-note-idx="${idx}" placeholder="可填写错误说明">${esc(row.review_note || "")}</textarea>
+                  <div class="field"><div class="k">条目释义</div>${esc(cells["条目释义"] || "")}</div>
+                </div>
+                <div class="field-grid">
+                  ${visibleHeaders.map((h) => `<div class="field"><div class="k">${esc(h)}</div>${esc(cells[h] || "")}</div>`).join("")}
+                </div>
+              `;
+              entry.addEventListener("toggle", () => {
+                if (entry.open) {
+                  STATE.selectedIndex = idx;
+                  updateStats();
+                }
+              });
+              const sel = entry.querySelector(".status-select");
+              if (sel) {
+                sel.addEventListener("change", (e) => {
+                  const i = Number.parseInt(e.target.getAttribute("data-idx"), 10);
+                  if (!Number.isFinite(i) || !STATE.rows[i]) return;
+                  STATE.rows[i].review_status = e.target.value;
+                  updateStats();
+                });
+              }
+              const note = entry.querySelector(".note-input");
+              if (note) {
+                note.addEventListener("input", (e) => {
+                  const i = Number.parseInt(e.target.getAttribute("data-note-idx"), 10);
+                  if (!Number.isFinite(i) || !STATE.rows[i]) return;
+                  STATE.rows[i].review_note = e.target.value;
+                });
+              }
+              bigDetails.appendChild(entry);
+            });
+            return;
+          }
+
+          const midDetails = document.createElement("details");
+          midDetails.className = "middle-card";
+          const midTitle = bucket.midIndex ? `${bucket.midIndex} ${midName}` : midName;
+          midDetails.innerHTML = `<summary><span>${esc(midTitle)}</span><span class="count">${entries.length} 条</span></summary>`;
+
+          const sortedEntries = entries.slice().sort((a, b) => {
+            const cellsA = a.row.cells || {};
+            const cellsB = b.row.cells || {};
+            const subA = orderValue(cellsA["小条目序号"]);
+            const subB = orderValue(cellsB["小条目序号"]);
+            if (subA !== subB) return subA - subB;
+            return (a.row.row_number || 0) - (b.row.row_number || 0);
+          });
+
+          sortedEntries.forEach(({ row, idx }) => {
+            const cells = row.cells || {};
+            const rawSub = (cells["小条目"] || "").trim();
+            if (!rawSub) {
+              const inline = document.createElement("div");
+              inline.className = "mid-inline";
+              inline.innerHTML = `
+                <div class="count" style="width:fit-content;margin-bottom:8px;">行 ${row.row_number}</div>
+                <div class="entry-meta">
+                  <select class="status-select" data-idx="${idx}">
+                    <option value="待校对"${row.review_status === "待校对" ? " selected" : ""}>待校对</option>
+                    <option value="校对无误"${row.review_status === "校对无误" ? " selected" : ""}>校对无误</option>
+                    <option value="有错误"${row.review_status === "有错误" ? " selected" : ""}>有错误</option>
+                  </select>
+                  <textarea class="note-input" data-note-idx="${idx}" placeholder="可填写错误说明">${esc(row.review_note || "")}</textarea>
+                  <div class="field"><div class="k">条目释义</div>${esc(cells["条目释义"] || "")}</div>
+                </div>
+                <div class="field-grid">
+                  ${visibleHeaders.map((h) => `<div class="field"><div class="k">${esc(h)}</div>${esc(cells[h] || "")}</div>`).join("")}
+                </div>
+              `;
+              const sel = inline.querySelector(".status-select");
+              if (sel) {
+                sel.addEventListener("change", (e) => {
+                  const i = Number.parseInt(e.target.getAttribute("data-idx"), 10);
+                  if (!Number.isFinite(i) || !STATE.rows[i]) return;
+                  STATE.rows[i].review_status = e.target.value;
+                  updateStats();
+                });
+              }
+              const note = inline.querySelector(".note-input");
+              if (note) {
+                note.addEventListener("input", (e) => {
+                  const i = Number.parseInt(e.target.getAttribute("data-note-idx"), 10);
+                  if (!Number.isFinite(i) || !STATE.rows[i]) return;
+                  STATE.rows[i].review_note = e.target.value;
+                });
+              }
+              midDetails.appendChild(inline);
+              return;
+            }
+            const sub = rawSub;
+            const entry = document.createElement("details");
+            entry.className = "entry-card";
+            entry.open = idx === STATE.selectedIndex;
+            const summaryRight = `<span class="count">行 ${row.row_number}</span>`;
+            entry.innerHTML = `
+              <summary><span>${esc(sub)}</span>${summaryRight}</summary>
+              <div class="entry-meta">
+                <select class="status-select" data-idx="${idx}">
+                  <option value="待校对"${row.review_status === "待校对" ? " selected" : ""}>待校对</option>
+                  <option value="校对无误"${row.review_status === "校对无误" ? " selected" : ""}>校对无误</option>
+                  <option value="有错误"${row.review_status === "有错误" ? " selected" : ""}>有错误</option>
+                </select>
+                <textarea class="note-input" data-note-idx="${idx}" placeholder="可填写错误说明">${esc(row.review_note || "")}</textarea>
+                <div class="field"><div class="k">条目释义</div>${esc(cells["条目释义"] || "")}</div>
+              </div>
+              <div class="field-grid">
+                ${visibleHeaders.map((h) => `<div class="field"><div class="k">${esc(h)}</div>${esc(cells[h] || "")}</div>`).join("")}
+              </div>
+            `;
+            entry.addEventListener("toggle", () => {
+              if (entry.open) {
+                STATE.selectedIndex = idx;
+                updateStats();
+              }
+            });
+
+            const sel = entry.querySelector(".status-select");
+            if (sel) {
+              sel.addEventListener("change", (e) => {
+                const i = Number.parseInt(e.target.getAttribute("data-idx"), 10);
+                if (!Number.isFinite(i) || !STATE.rows[i]) return;
+                STATE.rows[i].review_status = e.target.value;
+                updateStats();
+              });
+            }
+            const note = entry.querySelector(".note-input");
+            if (note) {
+              note.addEventListener("input", (e) => {
+                const i = Number.parseInt(e.target.getAttribute("data-note-idx"), 10);
+                if (!Number.isFinite(i) || !STATE.rows[i]) return;
+                STATE.rows[i].review_note = e.target.value;
+              });
+            }
+            midDetails.appendChild(entry);
+          });
+          bigDetails.appendChild(midDetails);
+        });
+        hierarchyView.appendChild(bigDetails);
+      });
+    }
+
+    function renderTable() {
+      renderHierarchy();
+    }
+
+    function csvEscape(value) {
+      const s = String(value ?? "");
+      return `"${s.replaceAll('"', '""')}"`;
+    }
+
+    function exportErrorRowsCsv() {
+      if (!STATE.rows.length) {
+        setStatus("当前没有可导出的数据。");
+        return;
+      }
+      const errorRows = STATE.rows.filter((r) => r.review_status === "有错误");
+      if (!errorRows.length) {
+        setStatus("还没有标记“有错误”的行。");
+        return;
+      }
+      const visibleHeaders = getVisibleHeaders();
+      const cols = ["行号", "校对结果", "校对备注", ...visibleHeaders];
+      const lines = [cols.map(csvEscape).join(",")];
+      errorRows.forEach((row) => {
+        const line = [
+          row.row_number,
+          row.review_status || "",
+          row.review_note || "",
+          ...visibleHeaders.map((h) => row.cells?.[h] || "")
+        ];
+        lines.push(line.map(csvEscape).join(","));
+      });
+      const csv = "\uFEFF" + lines.join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const base = (STATE.excelFile?.name || "excel").replace(/\.[^.]+$/, "");
+      a.download = `${base}_有错误行.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setStatus(`已导出 ${errorRows.length} 条“有错误”行。`);
+    }
+
+    function renderPdfPreview() {
+      if (!STATE.pdfToken) {
+        pdfFrame.src = "about:blank";
+        openPdfBtn.href = "#";
+        openPdfBtn.style.pointerEvents = "none";
+        openPdfBtn.style.opacity = "0.5";
+        return;
+      }
+      const url = `${API_BASE}/api/pdf/${STATE.pdfToken}`;
+      pdfFrame.src = url;
+      openPdfBtn.href = url;
+      openPdfBtn.style.pointerEvents = "auto";
+      openPdfBtn.style.opacity = "1";
+    }
+
+    function renderAll() {
+      updateStats();
+      renderTable();
+      renderPdfPreview();
+    }
+
+    excelBtn.addEventListener("click", () => excelInput.click());
+    pdfBtn.addEventListener("click", () => pdfInput.click());
+
+    excelInput.addEventListener("change", () => {
+      STATE.excelFile = excelInput.files?.[0] || null;
+      excelName.textContent = STATE.excelFile ? STATE.excelFile.name : "未选择";
+      compareBtn.disabled = !(STATE.excelFile && STATE.pdfFile);
+    });
+
+    pdfInput.addEventListener("change", () => {
+      STATE.pdfFile = pdfInput.files?.[0] || null;
+      pdfName.textContent = STATE.pdfFile ? STATE.pdfFile.name : "未选择";
+      compareBtn.disabled = !(STATE.excelFile && STATE.pdfFile);
+    });
+
+    compareBtn.addEventListener("click", async () => {
+      if (!STATE.excelFile || !STATE.pdfFile) return;
+      if (window.location.protocol === "file:") {
+        setStatus("当前是 file:// 打开，无法请求后端。请先启动服务并用 http://127.0.0.1:8765 打开页面。");
+        return;
+      }
+      setStatus("正在上传并执行校对，请稍候...");
+      compareBtn.disabled = true;
+      try {
+        const form = new FormData();
+        form.append("excel", STATE.excelFile, STATE.excelFile.name);
+        form.append("pdf", STATE.pdfFile, STATE.pdfFile.name);
+        const res = await fetch(`${API_BASE}/api/compare`, { method: "POST", body: form });
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "校对失败");
+        }
+        STATE.headers = data.headers || [];
+        STATE.rows = (data.rows || []).map((row) => ({
+          ...row,
+          review_status: "待校对",
+          review_note: ""
+        }));
+        STATE.selectedIndex = STATE.rows.length ? 0 : -1;
+        STATE.pdfToken = data.pdf_token || null;
+        exportErrorBtn.disabled = !STATE.rows.length;
+        renderAll();
+        setStatus(`加载完成：${data.row_count} 条。请用“校对结果”列标记，有错误行可一键导出。`);
+      } catch (err) {
+        setStatus(`校对失败：${err.message}`);
+      } finally {
+        compareBtn.disabled = !(STATE.excelFile && STATE.pdfFile);
+      }
+    });
+    exportErrorBtn.addEventListener("click", exportErrorRowsCsv);
+
+    renderAll();
+    if (window.location.protocol === "file:") {
+      setStatus("检测到 file:// 访问。请运行: python3 pdf_excel_proofread_server.py ，然后打开 http://127.0.0.1:8765");
+    }
+  </script>
+</body>
+</html>

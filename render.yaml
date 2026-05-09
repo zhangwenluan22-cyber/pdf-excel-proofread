@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: pdf-excel-proofread
+    runtime: python
+    plan: free
+    buildCommand: ""
+    startCommand: python3 pdf_excel_proofread_server.py
+    envVars:
+      - key: HOST
+        value: 0.0.0.0

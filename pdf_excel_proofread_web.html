@@ -381,6 +381,16 @@
       return STATE.headers.filter((h) => !HIDDEN_HEADERS.has(h));
     }
 
+    function pickCell(cells, names) {
+      for (const name of names) {
+        if (Object.prototype.hasOwnProperty.call(cells, name)) {
+          const v = String(cells[name] || "").trim();
+          if (v) return v;
+        }
+      }
+      return "";
+    }
+
     function orderValue(raw) {
       const text = String(raw || "").trim();
       if (!text) return Number.MAX_SAFE_INTEGER;
@@ -423,21 +433,25 @@
       STATE.rows.forEach((row, idx) => {
         const cells = row.cells || {};
         const big = (cells["大条目"] || "未分类大条目").trim() || "未分类大条目";
-        const mid = (cells["中条目"] || "").trim();
-        if (!grouped.has(big)) grouped.set(big, new Map());
-        const mids = grouped.get(big);
-        const midIndex = (cells["中条目序号"] || "").trim();
+        const bigIndex = pickCell(cells, ["大条目序号（带下标数字时填写）", "大条目序号"]);
+        const bigKey = bigIndex ? `${big}#${bigIndex}` : big;
+        const mid = pickCell(cells, ["中条目", "中条目(2)"]);
+        if (!grouped.has(bigKey)) grouped.set(bigKey, { bigName: big, bigIndex, mids: new Map() });
+        const mids = grouped.get(bigKey).mids;
+        const midIndex = pickCell(cells, ["中条目序号", "中条目序号(2)"]);
         const midKey = mid ? `${midIndex}||${mid}` : "__BIG_LEVEL__";
         if (!mids.has(midKey)) mids.set(midKey, { label: mid, midIndex, entries: [] });
         mids.get(midKey).entries.push({ row, idx });
       });
 
-      grouped.forEach((midMap, bigName) => {
+      grouped.forEach((group) => {
+        const { bigName, bigIndex, mids: midMap } = group;
         const bigDetails = document.createElement("details");
         bigDetails.className = "group-card";
         bigDetails.open = true;
         const totalCount = Array.from(midMap.values()).reduce((a, bucket) => a + bucket.entries.length, 0);
-        bigDetails.innerHTML = `<summary><span>${esc(bigName)}</span><span class="count">${totalCount} 条</span></summary>`;
+        const bigTitle = bigIndex ? `${bigName}#${bigIndex}` : bigName;
+        bigDetails.innerHTML = `<summary><span>${esc(bigTitle)}</span><span class="count">${totalCount} 条</span></summary>`;
         const midEntries = Array.from(midMap.entries()).sort((a, b) => {
           const [keyA, bucketA] = a;
           const [keyB, bucketB] = b;
@@ -506,7 +520,6 @@
           midDetails.className = "middle-card";
           const midTitle = bucket.midIndex ? `${bucket.midIndex} ${midName}` : midName;
           midDetails.innerHTML = `<summary><span>${esc(midTitle)}</span><span class="count">${entries.length} 条</span></summary>`;
-
           const sortedEntries = entries.slice().sort((a, b) => {
             const cellsA = a.row.cells || {};
             const cellsB = b.row.cells || {};

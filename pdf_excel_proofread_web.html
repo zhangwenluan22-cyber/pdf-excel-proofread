@@ -295,7 +295,7 @@
   <div class="shell">
     <section class="panel">
       <h1 style="margin:0;">PDF × Excel 人工校对台</h1>
-      <div class="muted" style="margin-top:6px;">保留 Excel 全表头与原始内容，右侧直接预览 PDF，不做自动文本解析。</div>
+      <div class="muted" style="margin-top:6px;">保留 Excel 全表头与原始内容。PDF 可选，不上传也可直接开始校对。</div>
       <div class="toolbar" style="margin-top:10px;">
         <div class="box">
           <div class="row">
@@ -305,8 +305,8 @@
           </div>
           <div class="row">
             <input id="pdfInput" type="file" accept=".pdf" />
-            <button id="pdfBtn">选择 PDF</button>
-            <span id="pdfName" class="muted">未选择</span>
+            <button id="pdfBtn">选择 PDF（可选）</button>
+            <span id="pdfName" class="muted">未选择（可选）</span>
           </div>
           <div class="row">
             <button id="compareBtn" class="primary" disabled>加载并开始校对</button>
@@ -328,7 +328,7 @@
     <section class="content">
       <section class="panel">
         <h2 style="margin:0;">Excel 全表头保留视图</h2>
-        <div class="muted" style="margin:6px 0 10px;">按大条目分组展开，便于逐条校对与内容确认。</div>
+          <div class="muted" style="margin:6px 0 10px;">按大条目分组展开，便于逐条校对与内容确认（可不上传 PDF）。</div>
         <div class="table-wrap">
           <div id="hierarchyView" class="hierarchy-wrap"></div>
         </div>
@@ -692,17 +692,17 @@
     excelInput.addEventListener("change", () => {
       STATE.excelFile = excelInput.files?.[0] || null;
       excelName.textContent = STATE.excelFile ? STATE.excelFile.name : "未选择";
-      compareBtn.disabled = !(STATE.excelFile && STATE.pdfFile);
+      compareBtn.disabled = !STATE.excelFile;
     });
 
     pdfInput.addEventListener("change", () => {
       STATE.pdfFile = pdfInput.files?.[0] || null;
       pdfName.textContent = STATE.pdfFile ? STATE.pdfFile.name : "未选择";
-      compareBtn.disabled = !(STATE.excelFile && STATE.pdfFile);
+      compareBtn.disabled = !STATE.excelFile;
     });
 
     compareBtn.addEventListener("click", async () => {
-      if (!STATE.excelFile || !STATE.pdfFile) return;
+      if (!STATE.excelFile) return;
       if (window.location.protocol === "file:") {
         setStatus("当前是 file:// 打开，无法请求后端。请先启动服务并用 http://127.0.0.1:8765 打开页面。");
         return;
@@ -712,7 +712,9 @@
       try {
         const form = new FormData();
         form.append("excel", STATE.excelFile, STATE.excelFile.name);
-        form.append("pdf", STATE.pdfFile, STATE.pdfFile.name);
+        if (STATE.pdfFile) {
+          form.append("pdf", STATE.pdfFile, STATE.pdfFile.name);
+        }
         const res = await fetch(`${API_BASE}/api/compare`, { method: "POST", body: form });
         const data = await res.json();
         if (!res.ok || !data.ok) {
@@ -728,11 +730,12 @@
         STATE.pdfToken = data.pdf_token || null;
         exportErrorBtn.disabled = !STATE.rows.length;
         renderAll();
-        setStatus(`加载完成：${data.row_count} 条。请用“校对结果”列标记，有错误行可一键导出。`);
+        const pdfMsg = STATE.pdfFile ? "已加载 PDF 预览。" : "本次未上传 PDF。";
+        setStatus(`加载完成：${data.row_count} 条。${pdfMsg} 请用“校对结果”列标记，有错误行可一键导出。`);
       } catch (err) {
         setStatus(`校对失败：${err.message}`);
       } finally {
-        compareBtn.disabled = !(STATE.excelFile && STATE.pdfFile);
+        compareBtn.disabled = !STATE.excelFile;
       }
     });
     exportErrorBtn.addEventListener("click", exportErrorRowsCsv);

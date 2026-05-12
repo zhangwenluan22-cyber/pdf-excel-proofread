@@ -330,8 +330,8 @@ def compare_rows_with_pdf(headers: list[str], rows: list[dict[str, Any]], pdf_te
 class UploadPayload:
     excel_bytes: bytes
     excel_name: str
-    pdf_bytes: bytes
-    pdf_name: str
+    pdf_bytes: bytes | None
+    pdf_name: str | None
 
 
 def parse_upload(handler: BaseHTTPRequestHandler) -> UploadPayload:
@@ -370,17 +370,20 @@ def parse_upload(handler: BaseHTTPRequestHandler) -> UploadPayload:
         filename = disp.group(2) or ""
         files[field_name] = (filename, body)
 
-    if "excel" not in files or "pdf" not in files:
-        raise ValueError("请同时上传 Excel 和 PDF。")
+    if "excel" not in files:
+        raise ValueError("请至少上传 Excel。")
     excel_name, excel_bytes = files["excel"]
-    pdf_name, pdf_bytes = files["pdf"]
-    if not excel_bytes or not pdf_bytes:
-        raise ValueError("上传文件内容为空。")
+    pdf_name = None
+    pdf_bytes = None
+    if "pdf" in files:
+        pdf_name, pdf_bytes = files["pdf"]
+    if not excel_bytes:
+        raise ValueError("上传 Excel 内容为空。")
     return UploadPayload(
         excel_bytes=excel_bytes,
         excel_name=(excel_name or "excel.xlsx"),
-        pdf_bytes=pdf_bytes,
-        pdf_name=(pdf_name or "document.pdf"),
+        pdf_bytes=pdf_bytes if pdf_bytes else None,
+        pdf_name=(pdf_name or "document.pdf") if pdf_bytes else None,
     )
 
 
@@ -441,8 +444,10 @@ class Handler(BaseHTTPRequestHandler):
                 }
                 for row in rows
             ]
-            token = uuid.uuid4().hex
-            PDF_STORE[token] = payload.pdf_bytes
+            token = None
+            if payload.pdf_bytes:
+                token = uuid.uuid4().hex
+                PDF_STORE[token] = payload.pdf_bytes
             _json_response(
                 self,
                 200,

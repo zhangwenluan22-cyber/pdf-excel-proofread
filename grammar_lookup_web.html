@@ -6,115 +6,384 @@
   <title>语法检索站</title>
   <style>
     :root {
-      --bg1: #f7f1e6;
-      --bg2: #e7d8c2;
-      --panel: #fffaf2;
-      --line: #d9c7ae;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --accent: #0f766e;
+      --bg: #fbfaf7;
+      --panel: #ffffff;
+      --line: #eee8de;
+      --soft: #f5f2eb;
+      --text: #39414d;
+      --muted: #7e8794;
+      --accent: #ef8d7d;
+      --accent-soft: #fff2ee;
+      --shadow: 0 18px 50px rgba(62, 55, 46, 0.08);
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      color: var(--text);
       font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-      background: radial-gradient(circle at 0% 0%, #fff7ec 0%, transparent 30%),
-        linear-gradient(180deg, var(--bg1), var(--bg2));
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(255, 237, 230, 0.9), transparent 24%),
+        linear-gradient(180deg, #fcfbf8 0%, #f7f4ee 100%);
     }
-    .shell { width: min(1700px, calc(100vw - 24px)); margin: 12px auto 18px; display: grid; gap: 12px; }
-    .panel { background: rgba(255, 250, 242, 0.96); border: 1px solid var(--line); border-radius: 16px; padding: 12px; }
-    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-    input, select {
-      border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font: inherit; background: #fff;
+    .shell {
+      width: min(1540px, calc(100vw - 28px));
+      margin: 20px auto 28px;
+      display: grid;
+      gap: 18px;
     }
-    #q { min-width: 320px; flex: 1 1 420px; }
-    button {
-      border: none; border-radius: 999px; padding: 8px 12px; font: inherit; font-weight: 700; cursor: pointer;
-      background: var(--accent); color: #fff;
+    .hero {
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid rgba(239, 141, 125, 0.18);
+      border-radius: 28px;
+      padding: 30px 28px 22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
     }
-    .muted { color: var(--muted); }
-    .layout { display: grid; grid-template-columns: 420px minmax(0, 1fr); gap: 10px; min-height: 70vh; }
-    .list, .detail { border: 1px solid var(--line); border-radius: 12px; background: #fff; min-height: 0; }
-    .list { overflow: auto; max-height: 72vh; }
-    .detail { overflow: auto; max-height: 72vh; padding: 10px; }
-    .item { padding: 10px; border-bottom: 1px solid #efe3d0; cursor: pointer; }
-    .item:hover { background: #fff9ef; }
-    .item.active { background: #eef8f7; }
-    .title { font-weight: 800; }
-    .sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
-    .sec { border: 1px solid #eadcc8; border-radius: 10px; padding: 8px; margin-top: 8px; background: #fffdf9; }
-    .sec h3 { margin: 0 0 6px; font-size: 14px; color: #334155; }
-    .line { white-space: pre-wrap; line-height: 1.55; }
-    @media (max-width: 1200px) { .layout { grid-template-columns: 1fr; } .list, .detail { max-height: none; } }
+    .hero-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    h1, h2, h3, p { margin: 0; }
+    .hero-title {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #2f3742;
+    }
+    .hero-sub {
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 860px;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+    .status {
+      color: #9a7d75;
+      font-size: 13px;
+      background: #fff8f5;
+      border: 1px solid #f5d9d2;
+      border-radius: 999px;
+      padding: 7px 12px;
+      white-space: nowrap;
+    }
+    .search-shell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 2px solid rgba(239, 141, 125, 0.65);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.92);
+      padding: 0 18px;
+      min-height: 76px;
+      box-shadow: 0 10px 28px rgba(239, 141, 125, 0.08);
+    }
+    .search-icon {
+      color: var(--accent);
+      font-size: 24px;
+      line-height: 1;
+      flex: 0 0 auto;
+    }
+    #q {
+      width: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      font: inherit;
+      font-size: clamp(20px, 2.2vw, 28px);
+      color: #313844;
+    }
+    #q::placeholder { color: #b3a7a2; }
+    .clear-btn {
+      border: none;
+      background: transparent;
+      color: #b99086;
+      font-size: 28px;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+    }
+    .kana-wrap {
+      margin-top: 18px;
+      display: grid;
+      gap: 10px;
+    }
+    .kana-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .kana-title {
+      font-size: 14px;
+      color: #8c776f;
+      font-weight: 700;
+    }
+    .kana-reset {
+      border: none;
+      background: transparent;
+      color: #ba786c;
+      font: inherit;
+      cursor: pointer;
+      padding: 0;
+      font-size: 13px;
+    }
+    .kana-grid {
+      display: grid;
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .kana-btn {
+      border: 1px solid #efe1d7;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 16px;
+      padding: 10px 0;
+      cursor: pointer;
+      color: #6d7684;
+      font: inherit;
+      font-weight: 700;
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+    }
+    .kana-btn:hover {
+      transform: translateY(-1px);
+      border-color: #efb1a6;
+      color: #bc6c5d;
+    }
+    .kana-btn.active {
+      background: var(--accent-soft);
+      border-color: #ef9f91;
+      color: #bc5d4c;
+      box-shadow: inset 0 0 0 1px rgba(239, 141, 125, 0.15);
+    }
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(360px, 0.92fr) minmax(0, 1.08fr);
+      gap: 18px;
+      min-height: 70vh;
+    }
+    .panel {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(227, 218, 207, 0.92);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      min-width: 0;
+    }
+    .results {
+      padding: 16px 14px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      min-height: 0;
+    }
+    .results-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding: 0 6px;
+    }
+    .results-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #5b6471;
+    }
+    .results-count {
+      color: #9e8d84;
+      font-size: 13px;
+    }
+    .list {
+      overflow: auto;
+      padding-right: 4px;
+      display: grid;
+      gap: 8px;
+    }
+    .item {
+      border: 1px solid #efe7de;
+      border-radius: 18px;
+      background: rgba(250, 249, 247, 0.9);
+      padding: 14px;
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+    .item:hover {
+      transform: translateY(-1px);
+      border-color: #efc5bb;
+      box-shadow: 0 8px 18px rgba(97, 81, 66, 0.06);
+    }
+    .item.active {
+      background: linear-gradient(180deg, #fff7f4 0%, #fffdfb 100%);
+      border-color: #efb0a4;
+      box-shadow: 0 10px 24px rgba(239, 141, 125, 0.12);
+    }
+    .item-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #2f3640;
+      letter-spacing: -0.01em;
+    }
+    .item-path {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #9a8e8a;
+      line-height: 1.45;
+    }
+    .item-desc {
+      margin-top: 7px;
+      font-size: 13px;
+      color: #67707c;
+      line-height: 1.55;
+    }
+    .detail {
+      padding: 24px 24px 22px;
+      overflow: auto;
+    }
+    .detail-empty {
+      display: grid;
+      place-items: center;
+      min-height: 100%;
+      color: #918883;
+      text-align: center;
+      line-height: 1.8;
+    }
+    .detail-path {
+      color: #9b8f88;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+    .detail-title {
+      font-size: clamp(30px, 4vw, 46px);
+      letter-spacing: -0.03em;
+      color: #37414c;
+      margin-top: 8px;
+      font-weight: 800;
+    }
+    .detail-grid {
+      display: grid;
+      gap: 14px;
+      margin-top: 24px;
+    }
+    .sec {
+      background: linear-gradient(180deg, rgba(250, 249, 246, 0.98) 0%, rgba(255, 255, 255, 0.98) 100%);
+      border: 1px solid #efe5dc;
+      border-radius: 22px;
+      padding: 16px 18px;
+    }
+    .sec-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: #6b7380;
+      letter-spacing: 0.03em;
+      margin-bottom: 8px;
+    }
+    .line {
+      white-space: pre-wrap;
+      line-height: 1.75;
+      font-size: 16px;
+      color: #39414d;
+    }
+    .examples .line {
+      font-size: 15px;
+    }
+    .jump-chip {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid #efc0b6;
+      background: #fff7f4;
+      color: #c06655;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      margin: 4px 8px 0 0;
+      cursor: pointer;
+    }
+    @media (max-width: 1280px) {
+      .kana-grid { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+    }
+    @media (max-width: 980px) {
+      .workspace { grid-template-columns: 1fr; }
+      .list, .detail { max-height: none; }
+      .kana-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+      .search-shell { min-height: 64px; }
+      #q { font-size: 20px; }
+    }
   </style>
 </head>
 <body>
   <div class="shell">
-    <section class="panel">
-      <h1 style="margin:0;">语法检索站</h1>
-      <div class="muted" style="margin-top:6px;">按关键词检索条目，查看释义、接续、解释、例句与参考项目。</div>
-      <div class="row" style="margin-top:10px;">
-        <input id="q" type="text" placeholder="搜索：大条目 / 中条目 / 小条目 / 释义 / 解释 / 例句..." />
-        <select id="funcFilter"><option value="">全部句型功能</option></select>
-        <button id="reloadBtn">刷新词典</button>
+    <section class="hero">
+      <div class="hero-top">
+        <div>
+          <h1 class="hero-title">语法检索站</h1>
+          <p class="hero-sub">先用关键词查，再按五十音浏览。左侧快速定位条目，右侧专注阅读释义、接续、解释、例句和参考项目。</p>
+        </div>
+        <div id="status" class="status">正在加载词典...</div>
       </div>
-      <div id="status" class="muted" style="margin-top:6px;">正在加载词典...</div>
+
+      <div class="search-shell">
+        <div class="search-icon">⌕</div>
+        <input id="q" type="text" placeholder="输入语法、释义、接续、例句关键词" />
+        <button id="clearBtn" class="clear-btn" type="button" aria-label="清空">×</button>
+      </div>
+
+      <div class="kana-wrap">
+        <div class="kana-head">
+          <div class="kana-title">按五十音浏览</div>
+          <button id="kanaResetBtn" class="kana-reset" type="button">清除假名筛选</button>
+        </div>
+        <div id="kanaGrid" class="kana-grid"></div>
+      </div>
     </section>
-    <section class="layout">
-      <section class="list" id="list"></section>
-      <section class="detail" id="detail"><div class="muted">请选择左侧条目。</div></section>
+
+    <section class="workspace">
+      <section class="panel results">
+        <div class="results-head">
+          <div class="results-title">匹配结果</div>
+          <div id="resultsCount" class="results-count">0 条</div>
+        </div>
+        <div id="list" class="list"></div>
+      </section>
+
+      <section class="panel detail" id="detail">
+        <div class="detail-empty">输入关键词，或者先点一个五十音。<br />选中左侧条目后，这里会显示完整语法信息。</div>
+      </section>
     </section>
   </div>
+
   <script>
-    const S = { rows: [], filtered: [], active: null };
+    const KANA = [
+      "あ","い","う","え","お","か","き","く","け","こ",
+      "さ","し","す","せ","そ","た","ち","つ","て","と",
+      "な","に","ぬ","ね","の","は","ひ","ふ","へ","ほ",
+      "ま","み","む","め","も","や","ゆ","よ","ら","り",
+      "る","れ","ろ","わ","を","ん"
+    ];
+
+    const S = { rows: [], filtered: [], active: null, kana: "", query: "" };
     const listEl = document.getElementById("list");
     const detailEl = document.getElementById("detail");
     const qEl = document.getElementById("q");
     const statusEl = document.getElementById("status");
-    const funcEl = document.getElementById("funcFilter");
-    const reloadBtn = document.getElementById("reloadBtn");
+    const resultsCountEl = document.getElementById("resultsCount");
+    const clearBtn = document.getElementById("clearBtn");
+    const kanaGrid = document.getElementById("kanaGrid");
+    const kanaResetBtn = document.getElementById("kanaResetBtn");
 
-    const esc = (v) => String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+    const esc = (v) => String(v ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;");
 
-    async function loadDict() {
-      statusEl.textContent = "正在加载词典...";
-      const res = await fetch("/api/dictionary");
-      const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data.error || "加载失败");
-      S.rows = (data.rows || []).map((r, idx) => ({ ...r, _id: idx }));
-      initFilters();
-      applyFilter();
-      statusEl.textContent = `已加载 ${S.rows.length} 条，来源：${data.source_file}`;
-    }
-
-    function initFilters() {
-      const funcs = Array.from(new Set(S.rows.map(r => (r.cells["条目句型功能"] || "").trim()).filter(Boolean))).sort();
-      funcEl.innerHTML = `<option value="">全部句型功能</option>` + funcs.map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join("");
-    }
-
-    function rowText(row) {
+    function firstKana(row) {
       const c = row.cells || {};
-      return [
-        c["大条目"], c["中条目"], c["小条目"], c["条目释义"], c["条目解释"],
-        c["条目接续"], c["条目句型功能"], c["例句原文块"], c["参考项目"]
-      ].join(" ").toLowerCase();
-    }
-
-    function applyFilter() {
-      const q = qEl.value.trim().toLowerCase();
-      const f = funcEl.value.trim();
-      S.filtered = S.rows.filter(r => {
-        const c = r.cells || {};
-        if (f && (c["条目句型功能"] || "").trim() !== f) return false;
-        if (!q) return true;
-        return rowText(r).includes(q);
-      });
-      renderList();
-      if (!S.filtered.some(x => x._id === S.active)) {
-        S.active = S.filtered[0]?._id ?? null;
-      }
-      renderDetail();
+      const text = String(c["大条目"] || c["中条目"] || c["小条目"] || "").trim();
+      return text ? text[0] : "";
     }
 
     function titleOf(row) {
@@ -128,52 +397,156 @@
       return `${big}${bidx ? "#" + bidx : ""} / ${mid || "-"}${midx ? "#" + midx : ""} / ${sub || "-"}${sidx ? "#" + sidx : ""}`;
     }
 
-    function renderList() {
-      listEl.innerHTML = "";
-      if (!S.filtered.length) {
-        listEl.innerHTML = `<div class="item"><div class="muted">无匹配结果</div></div>`;
-        return;
-      }
-      S.filtered.forEach(row => {
-        const c = row.cells || {};
-        const div = document.createElement("div");
-        div.className = `item${row._id === S.active ? " active" : ""}`;
-        div.innerHTML = `
-          <div class="title">${esc(c["小条目"] || c["中条目"] || c["大条目"] || "未命名条目")}</div>
-          <div class="sub">${esc(titleOf(row))}</div>
-          <div class="sub">${esc((c["条目释义"] || "").slice(0, 60))}</div>
-        `;
-        div.addEventListener("click", () => { S.active = row._id; renderList(); renderDetail(); });
-        listEl.appendChild(div);
-      });
-    }
-
-    function sec(title, text) {
-      if (!text || !String(text).trim()) return "";
-      return `<section class="sec"><h3>${esc(title)}</h3><div class="line">${esc(text)}</div></section>`;
-    }
-
-    function renderDetail() {
-      const row = S.rows.find(x => x._id === S.active);
-      if (!row) { detailEl.innerHTML = `<div class="muted">请选择左侧条目。</div>`; return; }
+    function mainLabel(row) {
       const c = row.cells || {};
-      detailEl.innerHTML = `
-        <h2 style="margin:0;">${esc(c["小条目"] || c["中条目"] || c["大条目"] || "未命名条目")}</h2>
-        <div class="muted" style="margin-top:6px;">${esc(titleOf(row))} ｜ Excel 行 ${esc(row.row_number)}</div>
-        ${sec("条目释义", c["条目释义"])}
-        ${sec("条目句型功能", c["条目句型功能"])}
-        ${sec("条目接续", c["条目接续"])}
-        ${sec("条目解释", c["条目解释"])}
-        ${sec("例句原文块", c["例句原文块"])}
-        ${sec("参考项目", c["参考项目"])}
+      return c["小条目"] || c["中条目"] || c["大条目"] || "未命名条目";
+    }
+
+    function rowText(row) {
+      const c = row.cells || {};
+      return [
+        c["大条目"], c["中条目"], c["小条目"], c["条目释义"], c["条目解释"],
+        c["条目接续"], c["条目句型功能"], c["例句原文块"], c["参考项目"]
+      ].join(" ").toLowerCase();
+    }
+
+    function sec(title, text, extraClass = "") {
+      if (!text || !String(text).trim()) return "";
+      return `
+        <section class="sec ${extraClass}">
+          <div class="sec-title">${esc(title)}</div>
+          <div class="line">${esc(text)}</div>
+        </section>
       `;
     }
 
-    qEl.addEventListener("input", applyFilter);
-    funcEl.addEventListener("change", applyFilter);
-    reloadBtn.addEventListener("click", () => loadDict().catch(e => statusEl.textContent = `加载失败：${e.message}`));
+    function renderKanaGrid() {
+      kanaGrid.innerHTML = "";
+      KANA.forEach((kana) => {
+        const btn = document.createElement("button");
+        btn.className = `kana-btn${S.kana === kana ? " active" : ""}`;
+        btn.textContent = kana;
+        btn.type = "button";
+        btn.addEventListener("click", () => {
+          S.kana = kana;
+          renderKanaGrid();
+          applyFilter();
+        });
+        kanaGrid.appendChild(btn);
+      });
+    }
 
-    loadDict().catch(e => statusEl.textContent = `加载失败：${e.message}`);
+    async function loadDict() {
+      statusEl.textContent = "正在加载词典...";
+      const res = await fetch("/api/dictionary");
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || "加载失败");
+      S.rows = (data.rows || []).map((row, idx) => ({ ...row, _id: idx }));
+      applyFilter();
+      statusEl.textContent = `已加载 ${S.rows.length} 条，来源：${data.source_file}`;
+    }
+
+    function applyFilter() {
+      const q = S.query.trim().toLowerCase();
+      S.filtered = S.rows.filter((row) => {
+        if (S.kana && firstKana(row) !== S.kana) return false;
+        if (!q) return true;
+        return rowText(row).includes(q);
+      });
+      if (!S.filtered.some((row) => row._id === S.active)) {
+        S.active = S.filtered[0]?._id ?? null;
+      }
+      renderResults();
+      renderDetail();
+    }
+
+    function renderResults() {
+      listEl.innerHTML = "";
+      resultsCountEl.textContent = `${S.filtered.length} 条`;
+      if (!S.filtered.length) {
+        listEl.innerHTML = `<div class="item"><div class="item-title">没有匹配结果</div><div class="item-desc">可以换一个关键词，或者清除五十音筛选后再试。</div></div>`;
+        return;
+      }
+      S.filtered.forEach((row) => {
+        const c = row.cells || {};
+        const item = document.createElement("div");
+        item.className = `item${row._id === S.active ? " active" : ""}`;
+        item.innerHTML = `
+          <div class="item-title">${esc(mainLabel(row))}</div>
+          <div class="item-path">${esc(titleOf(row))}</div>
+          <div class="item-desc">${esc((c["条目释义"] || c["条目解释"] || "").slice(0, 88))}</div>
+        `;
+        item.addEventListener("click", () => {
+          S.active = row._id;
+          renderResults();
+          renderDetail();
+        });
+        listEl.appendChild(item);
+      });
+    }
+
+    function renderRefJumps(text) {
+      if (!text || !String(text).trim()) return "";
+      const refs = String(text).split(/\s+|[，、,]/).map((v) => v.trim()).filter(Boolean);
+      if (!refs.length) return "";
+      return refs.map((ref) => `<button class="jump-chip" type="button" data-ref="${esc(ref)}">${esc(ref)}</button>`).join("");
+    }
+
+    function renderDetail() {
+      const row = S.rows.find((item) => item._id === S.active);
+      if (!row) {
+        detailEl.innerHTML = `<div class="detail-empty">输入关键词，或者先点一个五十音。<br />选中左侧条目后，这里会显示完整语法信息。</div>`;
+        return;
+      }
+      const c = row.cells || {};
+      detailEl.innerHTML = `
+        <div class="detail-path">${esc(titleOf(row))} ｜ Excel 行 ${esc(row.row_number)}</div>
+        <h2 class="detail-title">${esc(mainLabel(row))}</h2>
+        <div class="detail-grid">
+          ${sec("释义", c["条目释义"])}
+          ${sec("句型功能", c["条目句型功能"])}
+          ${sec("接续", c["条目接续"])}
+          ${sec("详解", c["条目解释"])}
+          ${sec("例句", c["例句原文块"], "examples")}
+          ${c["参考项目"] ? `<section class="sec"><div class="sec-title">参考项目</div><div class="line">${esc(c["参考项目"])}</div><div style="margin-top:10px;">${renderRefJumps(c["参考项目"])}</div></section>` : ""}
+        </div>
+      `;
+      detailEl.querySelectorAll(".jump-chip").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const ref = btn.getAttribute("data-ref") || "";
+          if (!ref) return;
+          qEl.value = ref;
+          S.query = ref;
+          S.kana = "";
+          renderKanaGrid();
+          applyFilter();
+        });
+      });
+    }
+
+    qEl.addEventListener("input", () => {
+      S.query = qEl.value;
+      applyFilter();
+    });
+
+    clearBtn.addEventListener("click", () => {
+      qEl.value = "";
+      S.query = "";
+      applyFilter();
+      qEl.focus();
+    });
+
+    kanaResetBtn.addEventListener("click", () => {
+      S.kana = "";
+      renderKanaGrid();
+      applyFilter();
+    });
+
+    renderKanaGrid();
+    loadDict().catch((e) => {
+      statusEl.textContent = `加载失败：${e.message}`;
+      listEl.innerHTML = `<div class="item"><div class="item-title">加载失败</div><div class="item-desc">${esc(e.message)}</div></div>`;
+    });
   </script>
 </body>
 </html>

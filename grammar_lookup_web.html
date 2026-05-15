@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>语法检索站</title>
+  <style>
+    :root {
+      --bg1: #f7f1e6;
+      --bg2: #e7d8c2;
+      --panel: #fffaf2;
+      --line: #d9c7ae;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #0f766e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: radial-gradient(circle at 0% 0%, #fff7ec 0%, transparent 30%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+    }
+    .shell { width: min(1700px, calc(100vw - 24px)); margin: 12px auto 18px; display: grid; gap: 12px; }
+    .panel { background: rgba(255, 250, 242, 0.96); border: 1px solid var(--line); border-radius: 16px; padding: 12px; }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    input, select {
+      border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font: inherit; background: #fff;
+    }
+    #q { min-width: 320px; flex: 1 1 420px; }
+    button {
+      border: none; border-radius: 999px; padding: 8px 12px; font: inherit; font-weight: 700; cursor: pointer;
+      background: var(--accent); color: #fff;
+    }
+    .muted { color: var(--muted); }
+    .layout { display: grid; grid-template-columns: 420px minmax(0, 1fr); gap: 10px; min-height: 70vh; }
+    .list, .detail { border: 1px solid var(--line); border-radius: 12px; background: #fff; min-height: 0; }
+    .list { overflow: auto; max-height: 72vh; }
+    .detail { overflow: auto; max-height: 72vh; padding: 10px; }
+    .item { padding: 10px; border-bottom: 1px solid #efe3d0; cursor: pointer; }
+    .item:hover { background: #fff9ef; }
+    .item.active { background: #eef8f7; }
+    .title { font-weight: 800; }
+    .sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .sec { border: 1px solid #eadcc8; border-radius: 10px; padding: 8px; margin-top: 8px; background: #fffdf9; }
+    .sec h3 { margin: 0 0 6px; font-size: 14px; color: #334155; }
+    .line { white-space: pre-wrap; line-height: 1.55; }
+    @media (max-width: 1200px) { .layout { grid-template-columns: 1fr; } .list, .detail { max-height: none; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="panel">
+      <h1 style="margin:0;">语法检索站</h1>
+      <div class="muted" style="margin-top:6px;">按关键词检索条目，查看释义、接续、解释、例句与参考项目。</div>
+      <div class="row" style="margin-top:10px;">
+        <input id="q" type="text" placeholder="搜索：大条目 / 中条目 / 小条目 / 释义 / 解释 / 例句..." />
+        <select id="funcFilter"><option value="">全部句型功能</option></select>
+        <button id="reloadBtn">刷新词典</button>
+      </div>
+      <div id="status" class="muted" style="margin-top:6px;">正在加载词典...</div>
+    </section>
+    <section class="layout">
+      <section class="list" id="list"></section>
+      <section class="detail" id="detail"><div class="muted">请选择左侧条目。</div></section>
+    </section>
+  </div>
+  <script>
+    const S = { rows: [], filtered: [], active: null };
+    const listEl = document.getElementById("list");
+    const detailEl = document.getElementById("detail");
+    const qEl = document.getElementById("q");
+    const statusEl = document.getElementById("status");
+    const funcEl = document.getElementById("funcFilter");
+    const reloadBtn = document.getElementById("reloadBtn");
+
+    const esc = (v) => String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+
+    async function loadDict() {
+      statusEl.textContent = "正在加载词典...";
+      const res = await fetch("/api/dictionary");
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || "加载失败");
+      S.rows = (data.rows || []).map((r, idx) => ({ ...r, _id: idx }));
+      initFilters();
+      applyFilter();
+      statusEl.textContent = `已加载 ${S.rows.length} 条，来源：${data.source_file}`;
+    }
+
+    function initFilters() {
+      const funcs = Array.from(new Set(S.rows.map(r => (r.cells["条目句型功能"] || "").trim()).filter(Boolean))).sort();
+      funcEl.innerHTML = `<option value="">全部句型功能</option>` + funcs.map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join("");
+    }
+
+    function rowText(row) {
+      const c = row.cells || {};
+      return [
+        c["大条目"], c["中条目"], c["小条目"], c["条目释义"], c["条目解释"],
+        c["条目接续"], c["条目句型功能"], c["例句原文块"], c["参考项目"]
+      ].join(" ").toLowerCase();
+    }
+
+    function applyFilter() {
+      const q = qEl.value.trim().toLowerCase();
+      const f = funcEl.value.trim();
+      S.filtered = S.rows.filter(r => {
+        const c = r.cells || {};
+        if (f && (c["条目句型功能"] || "").trim() !== f) return false;
+        if (!q) return true;
+        return rowText(r).includes(q);
+      });
+      renderList();
+      if (!S.filtered.some(x => x._id === S.active)) {
+        S.active = S.filtered[0]?._id ?? null;
+      }
+      renderDetail();
+    }
+
+    function titleOf(row) {
+      const c = row.cells || {};
+      const big = (c["大条目"] || "").trim();
+      const bidx = (c["大条目序号（带下标数字时填写）"] || c["大条目序号"] || "").trim();
+      const mid = (c["中条目"] || "").trim();
+      const midx = (c["中条目序号"] || "").trim();
+      const sub = (c["小条目"] || "").trim();
+      const sidx = (c["小条目序号"] || "").trim();
+      return `${big}${bidx ? "#" + bidx : ""} / ${mid || "-"}${midx ? "#" + midx : ""} / ${sub || "-"}${sidx ? "#" + sidx : ""}`;
+    }
+
+    function renderList() {
+      listEl.innerHTML = "";
+      if (!S.filtered.length) {
+        listEl.innerHTML = `<div class="item"><div class="muted">无匹配结果</div></div>`;
+        return;
+      }
+      S.filtered.forEach(row => {
+        const c = row.cells || {};
+        const div = document.createElement("div");
+        div.className = `item${row._id === S.active ? " active" : ""}`;
+        div.innerHTML = `
+          <div class="title">${esc(c["小条目"] || c["中条目"] || c["大条目"] || "未命名条目")}</div>
+          <div class="sub">${esc(titleOf(row))}</div>
+          <div class="sub">${esc((c["条目释义"] || "").slice(0, 60))}</div>
+        `;
+        div.addEventListener("click", () => { S.active = row._id; renderList(); renderDetail(); });
+        listEl.appendChild(div);
+      });
+    }
+
+    function sec(title, text) {
+      if (!text || !String(text).trim()) return "";
+      return `<section class="sec"><h3>${esc(title)}</h3><div class="line">${esc(text)}</div></section>`;
+    }
+
+    function renderDetail() {
+      const row = S.rows.find(x => x._id === S.active);
+      if (!row) { detailEl.innerHTML = `<div class="muted">请选择左侧条目。</div>`; return; }
+      const c = row.cells || {};
+      detailEl.innerHTML = `
+        <h2 style="margin:0;">${esc(c["小条目"] || c["中条目"] || c["大条目"] || "未命名条目")}</h2>
+        <div class="muted" style="margin-top:6px;">${esc(titleOf(row))} ｜ Excel 行 ${esc(row.row_number)}</div>
+        ${sec("条目释义", c["条目释义"])}
+        ${sec("条目句型功能", c["条目句型功能"])}
+        ${sec("条目接续", c["条目接续"])}
+        ${sec("条目解释", c["条目解释"])}
+        ${sec("例句原文块", c["例句原文块"])}
+        ${sec("参考项目", c["参考项目"])}
+      `;
+    }
+
+    qEl.addEventListener("input", applyFilter);
+    funcEl.addEventListener("change", applyFilter);
+    reloadBtn.addEventListener("click", () => loadDict().catch(e => statusEl.textContent = `加载失败：${e.message}`));
+
+    loadDict().catch(e => statusEl.textContent = `加载失败：${e.message}`);
+  </script>
+</body>
+</html>

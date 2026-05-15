@@ -21,8 +21,11 @@ HOST = os.environ.get("HOST", "0.0.0.0")
 PORT = int(os.environ.get("PORT", "8765"))
 BASE_DIR = Path(__file__).resolve().parent
 INDEX_FILE = BASE_DIR / "pdf_excel_proofread_web.html"
+LOOKUP_FILE = BASE_DIR / "grammar_lookup_web.html"
+DEFAULT_DICT_FILE = BASE_DIR / "句型辞典_已校对合并_2-851.xlsx"
 
 PDF_STORE: dict[str, bytes] = {}
+DICT_CACHE: dict[str, Any] = {"mtime": None, "payload": None}
 
 XML_NS = {"x": "http://schemas.openxmlformats.org/spreadsheetml/2006/main"}
 REL_NS = {"r": "http://schemas.openxmlformats.org/package/2006/relationships"}
@@ -405,6 +408,34 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
+            return
+        if path == "/lookup":
+            if not LOOKUP_FILE.exists():
+                self.send_error(404, "Missing lookup file")
+                return
+            body = LOOKUP_FILE.read_bytes()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+        if path == "/api/dictionary":
+            if not DEFAULT_DICT_FILE.exists():
+                _json_response(self, 404, {"ok": False, "error": f"缺少词典文件: {DEFAULT_DICT_FILE.name}"})
+                return
+            mtime = DEFAULT_DICT_FILE.stat().st_mtime
+            if DICT_CACHE["payload"] is None or DICT_CACHE["mtime"] != mtime:
+                headers, rows = parse_excel_keep_headers(DEFAULT_DICT_FILE.read_bytes())
+                DICT_CACHE["mtime"] = mtime
+                DICT_CACHE["payload"] = {
+                    "ok": True,
+                    "headers": headers,
+                    "rows": rows,
+                    "row_count": len(rows),
+                    "source_file": DEFAULT_DICT_FILE.name,
+                }
+            _json_response(self, 200, DICT_CACHE["payload"])
             return
         if path.startswith("/api/pdf/"):
             token = path.split("/api/pdf/", 1)[1]

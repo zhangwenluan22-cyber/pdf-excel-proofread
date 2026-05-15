@@ -23,6 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent
 INDEX_FILE = BASE_DIR / "pdf_excel_proofread_web.html"
 LOOKUP_FILE = BASE_DIR / "grammar_lookup_web.html"
 DEFAULT_DICT_FILE = BASE_DIR / "句型辞典_已校对合并_2-851.xlsx"
+DICT_JSON_FILE = BASE_DIR / "dictionary.json"
 
 PDF_STORE: dict[str, bytes] = {}
 DICT_CACHE: dict[str, Any] = {"mtime": None, "payload": None}
@@ -436,6 +437,18 @@ class Handler(BaseHTTPRequestHandler):
                     "source_file": DEFAULT_DICT_FILE.name,
                 }
             _json_response(self, 200, DICT_CACHE["payload"])
+            return
+        if path == "/dictionary.json":
+            if not DICT_JSON_FILE.exists():
+                self.send_error(404, "dictionary.json not found")
+                return
+            body = DICT_JSON_FILE.read_bytes()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(body)
             return
         if path.startswith("/api/pdf/"):
             token = path.split("/api/pdf/", 1)[1]

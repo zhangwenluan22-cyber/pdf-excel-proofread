@@ -30,6 +30,7 @@
       margin: 20px auto 28px;
       display: grid;
       gap: 18px;
+      min-height: calc(100vh - 40px);
     }
     .hero {
       background: rgba(255, 255, 255, 0.82);
@@ -163,7 +164,9 @@
       display: grid;
       grid-template-columns: minmax(360px, 0.92fr) minmax(0, 1.08fr);
       gap: 18px;
-      min-height: 70vh;
+      min-height: 0;
+      flex: 1 1 auto;
+      align-items: start;
     }
     .panel {
       background: rgba(255, 255, 255, 0.88);
@@ -178,6 +181,8 @@
       display: grid;
       grid-template-rows: auto 1fr;
       min-height: 0;
+      max-height: calc(100vh - 290px);
+      min-height: calc(100vh - 290px);
     }
     .results-head {
       display: flex;
@@ -241,6 +246,8 @@
     .detail {
       padding: 24px 24px 22px;
       overflow: auto;
+      max-height: calc(100vh - 290px);
+      min-height: calc(100vh - 290px);
     }
     .detail-empty {
       display: grid;
@@ -306,8 +313,14 @@
       .kana-grid { grid-template-columns: repeat(8, minmax(0, 1fr)); }
     }
     @media (max-width: 980px) {
+      .shell {
+        min-height: auto;
+      }
       .workspace { grid-template-columns: 1fr; }
-      .list, .detail { max-height: none; }
+      .results, .detail {
+        max-height: none;
+        min-height: auto;
+      }
       .kana-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
       .search-shell { min-height: 64px; }
       #q { font-size: 20px; }
@@ -436,14 +449,33 @@
       });
     }
 
+    async function fetchDictionaryPayload() {
+      const candidates = ["/api/dictionary", "./dictionary.json"];
+      let lastError = null;
+      for (const url of candidates) {
+        try {
+          const res = await fetch(url);
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.error || `请求失败: ${url}`);
+          }
+          if (data.ok === false) {
+            throw new Error(data.error || `数据不可用: ${url}`);
+          }
+          return data;
+        } catch (err) {
+          lastError = err;
+        }
+      }
+      throw lastError || new Error("无法加载词典数据");
+    }
+
     async function loadDict() {
       statusEl.textContent = "正在加载词典...";
-      const res = await fetch("/api/dictionary");
-      const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data.error || "加载失败");
+      const data = await fetchDictionaryPayload();
       S.rows = (data.rows || []).map((row, idx) => ({ ...row, _id: idx }));
       applyFilter();
-      statusEl.textContent = `已加载 ${S.rows.length} 条，来源：${data.source_file}`;
+      statusEl.textContent = `已加载 ${S.rows.length} 条，来源：${data.source_file || "dictionary.json"}`;
     }
 
     function applyFilter() {

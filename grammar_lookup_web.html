@@ -24,19 +24,22 @@
       background:
         radial-gradient(circle at top left, rgba(255, 237, 230, 0.9), transparent 24%),
         linear-gradient(180deg, #fcfbf8 0%, #f7f4ee 100%);
+      overflow: hidden;
     }
     .shell {
       width: min(1540px, calc(100vw - 28px));
-      margin: 20px auto 28px;
+      margin: 14px auto;
       display: grid;
-      gap: 18px;
-      min-height: calc(100vh - 40px);
+      gap: 14px;
+      height: calc(100vh - 28px);
+      overflow: hidden;
+      grid-template-rows: auto minmax(0, 1fr);
     }
     .hero {
       background: rgba(255, 255, 255, 0.82);
       border: 1px solid rgba(239, 141, 125, 0.18);
       border-radius: 28px;
-      padding: 30px 28px 22px;
+      padding: 20px 24px 18px;
       box-shadow: var(--shadow);
       backdrop-filter: blur(10px);
     }
@@ -46,7 +49,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 14px;
-      margin-bottom: 18px;
+      margin-bottom: 12px;
     }
     h1, h2, h3, p { margin: 0; }
     .hero-title {
@@ -57,10 +60,10 @@
     }
     .hero-sub {
       color: var(--muted);
-      line-height: 1.7;
+      line-height: 1.6;
       max-width: 860px;
-      margin-top: 8px;
-      font-size: 14px;
+      margin-top: 6px;
+      font-size: 13px;
     }
     .status {
       color: #9a7d75;
@@ -79,7 +82,7 @@
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.92);
       padding: 0 18px;
-      min-height: 76px;
+      min-height: 62px;
       box-shadow: 0 10px 28px rgba(239, 141, 125, 0.08);
     }
     .search-icon {
@@ -108,9 +111,9 @@
       line-height: 1;
     }
     .kana-wrap {
-      margin-top: 18px;
+      margin-top: 12px;
       display: grid;
-      gap: 10px;
+      gap: 8px;
     }
     .kana-head {
       display: flex;
@@ -136,13 +139,13 @@
     .kana-grid {
       display: grid;
       grid-template-columns: repeat(10, minmax(0, 1fr));
-      gap: 8px;
+      gap: 6px;
     }
     .kana-btn {
       border: 1px solid #efe1d7;
       background: rgba(255, 255, 255, 0.9);
       border-radius: 16px;
-      padding: 10px 0;
+      padding: 8px 0;
       cursor: pointer;
       color: #6d7684;
       font: inherit;
@@ -165,8 +168,8 @@
       grid-template-columns: minmax(360px, 0.92fr) minmax(0, 1.08fr);
       gap: 18px;
       min-height: 0;
-      flex: 1 1 auto;
       align-items: start;
+      height: 100%;
     }
     .panel {
       background: rgba(255, 255, 255, 0.88);
@@ -181,8 +184,7 @@
       display: grid;
       grid-template-rows: auto 1fr;
       min-height: 0;
-      max-height: calc(100vh - 290px);
-      min-height: calc(100vh - 290px);
+      height: 100%;
     }
     .results-head {
       display: flex;
@@ -246,8 +248,8 @@
     .detail {
       padding: 24px 24px 22px;
       overflow: auto;
-      max-height: calc(100vh - 290px);
-      min-height: calc(100vh - 290px);
+      height: 100%;
+      min-height: 0;
     }
     .detail-empty {
       display: grid;
@@ -287,14 +289,54 @@
       letter-spacing: 0.03em;
       margin-bottom: 8px;
     }
+    .sec-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .sec-head .sec-title {
+      margin-bottom: 0;
+    }
     .line {
       white-space: pre-wrap;
       line-height: 1.75;
       font-size: 16px;
       color: #39414d;
     }
-    .examples .line {
+    .examples {
+      padding: 18px 18px 14px;
+    }
+    .examples-list {
+      display: grid;
+      gap: 18px;
+    }
+    .example-item {
+      display: grid;
+      gap: 4px;
+    }
+    .example-ja,
+    .example-zh,
+    .example-mixed {
+      margin: 0;
+      white-space: pre-wrap;
+    }
+    .example-ja {
+      color: #313844;
+      font-size: 17px;
+      line-height: 1.85;
+      letter-spacing: -0.01em;
+    }
+    .example-zh {
+      color: #98928f;
       font-size: 15px;
+      line-height: 1.8;
+    }
+    .example-mixed {
+      color: #5b6471;
+      font-size: 15px;
+      line-height: 1.8;
     }
     .jump-chip {
       display: inline-flex;
@@ -309,21 +351,96 @@
       margin: 4px 8px 0 0;
       cursor: pointer;
     }
+    .guide-toggle {
+      border: 1px solid #efd5cb;
+      background: #fff8f4;
+      color: #b76857;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .guide-card {
+      margin-top: 12px;
+      border-top: 1px solid #f1e6dd;
+      padding-top: 14px;
+      display: grid;
+      gap: 14px;
+    }
+    .guide-intro {
+      color: #7d756f;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+    .guide-group {
+      display: grid;
+      gap: 8px;
+    }
+    .guide-group-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: #6b7380;
+    }
+    .guide-table {
+      display: grid;
+      gap: 8px;
+    }
+    .guide-row {
+      display: grid;
+      grid-template-columns: minmax(92px, 120px) minmax(120px, 170px) minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      border: 1px solid #f0e7de;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.72);
+      padding: 10px 12px;
+    }
+    .guide-symbol {
+      color: #36404b;
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .guide-meaning {
+      color: #746d68;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+    .guide-examples {
+      color: #525b67;
+      font-size: 13px;
+      line-height: 1.72;
+    }
+    .guide-note {
+      margin-top: 4px;
+      color: #8a7a73;
+    }
     @media (max-width: 1280px) {
       .kana-grid { grid-template-columns: repeat(8, minmax(0, 1fr)); }
     }
     @media (max-width: 980px) {
+      body {
+        overflow: auto;
+      }
       .shell {
-        min-height: auto;
+        height: auto;
+        overflow: visible;
       }
       .workspace { grid-template-columns: 1fr; }
       .results, .detail {
+        height: auto;
         max-height: none;
         min-height: auto;
       }
       .kana-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
       .search-shell { min-height: 64px; }
       #q { font-size: 20px; }
+      .guide-row {
+        grid-template-columns: 1fr;
+        gap: 4px;
+      }
     }
   </style>
 </head>
@@ -368,7 +485,55 @@
     </section>
   </div>
 
+  <script src="./dictionary_data.js"></script>
   <script>
+    const GRAMMAR_SYMBOL_GUIDE = [
+      {
+        group: "名词",
+        items: [
+          { symbol: "N", meaning: "名词", examples: "花、人、希望、昨日あった人、人にあったこと" }
+        ]
+      },
+      {
+        group: "ナ形容词",
+        items: [
+          { symbol: "Na", meaning: "ナ形容词词干", examples: "きれい、静か、元気" }
+        ]
+      },
+      {
+        group: "イ形容词",
+        items: [
+          { symbol: "A", meaning: "简体イ形容词", examples: "暑い、暑くない、暑かった", note: "“Aそうだ”可表示“暑いそうだ、暑くないそうだ、暑かったそうだ”等。" },
+          { symbol: "A-", meaning: "イ形容词词干", examples: "暑、おもしろ、楽し", note: "“A-そうだ”可表示“暑そうだ、おもしろそうだ、楽しそうだ”等。" },
+          { symbol: "A-い", meaning: "イ形容词词典形", examples: "暑い、おもしろい、楽しい" },
+          { symbol: "A-く", meaning: "イ形容词ク形", examples: "暑く、おもしろく、楽しく" },
+          { symbol: "A-くない", meaning: "イ形容词否定形", examples: "暑くない、おもしろくない、楽しくない" },
+          { symbol: "A-くて", meaning: "イ形容词テ形", examples: "暑くて、おもしろくて、楽しくて" },
+          { symbol: "A-かった", meaning: "イ形容词タ形", examples: "暑かった、おもしろかった、楽しかった" },
+          { symbol: "A-かろう", meaning: "イ形容词推量形", examples: "暑かろう、おもしろかろう、楽し かろう" },
+          { symbol: "A-かったろう", meaning: "イ形容词过去推量形", examples: "暑かったろう、おもしろかったろう、楽しかったろう" },
+          { symbol: "A-ければ", meaning: "イ形容词バ形", examples: "暑ければ、おもしろければ、楽しければ" }
+        ]
+      },
+      {
+        group: "动词",
+        items: [
+          { symbol: "V", meaning: "简体动词", examples: "書く、書かない、書いた", note: "“Vそうだ”可表示“書くそうだ、書かないそうだ、書いたそうだ”等。" },
+          { symbol: "R", meaning: "动词连用形（动词マス形去掉マス的形式）", examples: "書き、読み、見、来、し", note: "“R-そうだ”可表示“書きそうだ、読みそうだ、見そうだ、きそうだ、しそうだ”等。" },
+          { symbol: "V-る", meaning: "动词词典形", examples: "書く、読む、見る、来る、する" },
+          { symbol: "V-た", meaning: "动词タ形", examples: "書いた、読んだ、見た、来た、した" },
+          { symbol: "V-ただろう", meaning: "动词过去推量形", examples: "書いただろう、読んだろう、見ただろう、来ただろう、しただろう" },
+          { symbol: "V-ない", meaning: "动词否定形", examples: "書かない、読まない、見ない、こない、しない" },
+          { symbol: "V-て", meaning: "动词テ形", examples: "書いて、読んで、見て、来て、して" },
+          { symbol: "V-ば", meaning: "动词バ形", examples: "書けば、読めば、見れば、来れば、すれば" },
+          { symbol: "V-よう", meaning: "动词意向形", examples: "書こう、読もう、見よう、来よう、しよう" },
+          { symbol: "V-れる", meaning: "动词可能形", examples: "書ける、読める、見られる、来られる、できる" },
+          { symbol: "V-られる", meaning: "动词被动形", examples: "書かれる、読まれる、見られる、来られる、される" },
+          { symbol: "V-させる", meaning: "动词使役形", examples: "書かせる、読ませる、見させる、来させる、させる" }
+        ]
+      }
+    ];
+
     const KANA = [
       "あ","い","う","え","お","か","き","く","け","こ",
       "さ","し","す","せ","そ","た","ち","つ","て","と",
@@ -377,7 +542,7 @@
       "る","れ","ろ","わ","を","ん"
     ];
 
-    const S = { rows: [], filtered: [], active: null, kana: "", query: "" };
+    const S = { rows: [], filtered: [], active: null, kana: "", query: "", guideOpen: false, refIndex: new Map() };
     const listEl = document.getElementById("list");
     const detailEl = document.getElementById("detail");
     const qEl = document.getElementById("q");
@@ -393,10 +558,27 @@
       .replaceAll(">", "&gt;")
       .replaceAll('"', "&quot;");
 
+    function normalizeRefKey(value) {
+      return String(value ?? "")
+        .normalize("NFKC")
+        .replace(/[‐‑‒–—―−﹣－]/g, "-")
+        .replace(/\s+/g, "")
+        .toLowerCase()
+        .trim();
+    }
+
     function firstKana(row) {
       const c = row.cells || {};
       const text = String(c["大条目"] || c["中条目"] || c["小条目"] || "").trim();
       return text ? text[0] : "";
+    }
+
+    function normalizeSearchText(value) {
+      return String(value ?? "")
+        .normalize("NFKC")
+        .replace(/\s+/g, "")
+        .toLowerCase()
+        .trim();
     }
 
     function titleOf(row) {
@@ -420,7 +602,49 @@
       return [
         c["大条目"], c["中条目"], c["小条目"], c["条目释义"], c["条目解释"],
         c["条目接续"], c["条目句型功能"], c["例句原文块"], c["参考项目"]
-      ].join(" ").toLowerCase();
+      ].map(normalizeSearchText).join(" ");
+    }
+
+    function searchScore(row, query) {
+      const c = row.cells || {};
+      const big = normalizeSearchText(c["大条目"]);
+      const mid = normalizeSearchText(c["中条目"]);
+      const sub = normalizeSearchText(c["小条目"]);
+      const main = normalizeSearchText(mainLabel(row));
+      const meaning = normalizeSearchText(c["条目释义"]);
+      const explanation = normalizeSearchText(c["条目解释"]);
+      const continuation = normalizeSearchText(c["条目接续"]);
+      const examples = normalizeSearchText(c["例句原文块"]);
+      const refs = normalizeSearchText(c["参考项目"]);
+
+      const titleFields = [sub, mid, big, main];
+      const detailFields = [meaning, explanation, continuation, examples, refs];
+
+      let score = 0;
+      for (const field of titleFields) {
+        if (!field) continue;
+        if (field === query) score = Math.max(score, 1200);
+        else if (field.startsWith(query)) score = Math.max(score, 900);
+        else if (field.includes(query)) score = Math.max(score, 700);
+      }
+
+      for (const field of detailFields) {
+        if (!field) continue;
+        if (field === query) score = Math.max(score, 420);
+        else if (field.startsWith(query)) score = Math.max(score, 300);
+        else if (field.includes(query)) score = Math.max(score, 180);
+      }
+
+      const mainLen = main ? main.length : 9999;
+      return { score, mainLen };
+    }
+
+    function compareSearchRows(a, b, query) {
+      const sa = searchScore(a, query);
+      const sb = searchScore(b, query);
+      if (sb.score !== sa.score) return sb.score - sa.score;
+      if (sa.mainLen !== sb.mainLen) return sa.mainLen - sb.mainLen;
+      return a.row_number - b.row_number;
     }
 
     function sec(title, text, extraClass = "") {
@@ -429,6 +653,125 @@
         <section class="sec ${extraClass}">
           <div class="sec-title">${esc(title)}</div>
           <div class="line">${esc(text)}</div>
+        </section>
+      `;
+    }
+
+    function addRefAlias(index, alias, rowId) {
+      const key = normalizeRefKey(alias);
+      if (!key || index.has(key)) return;
+      index.set(key, rowId);
+    }
+
+    function buildReferenceIndex(rows) {
+      const index = new Map();
+      rows.forEach((row) => {
+        const c = row.cells || {};
+        const big = String(c["大条目"] || "").trim();
+        const bigIdx = String(c["大条目序号（带下标数字时填写）"] || c["大条目序号"] || "").trim();
+        const midIdx = String(c["中条目序号"] || "").trim();
+        const subIdx = String(c["小条目序号"] || "").trim();
+        if (!big) return;
+
+        addRefAlias(index, big, row._id);
+
+        if (bigIdx) {
+          addRefAlias(index, `${big}#${bigIdx}`, row._id);
+          addRefAlias(index, `${big}-${bigIdx}`, row._id);
+        }
+
+        if (midIdx) {
+          addRefAlias(index, `${big}-${midIdx}`, row._id);
+          if (bigIdx) {
+            addRefAlias(index, `${big}#${bigIdx}-${midIdx}`, row._id);
+            addRefAlias(index, `${big}-${bigIdx}-${midIdx}`, row._id);
+          }
+        }
+
+        if (midIdx && subIdx) {
+          addRefAlias(index, `${big}-${midIdx}-${subIdx}`, row._id);
+          if (bigIdx) {
+            addRefAlias(index, `${big}#${bigIdx}-${midIdx}-${subIdx}`, row._id);
+            addRefAlias(index, `${big}-${bigIdx}-${midIdx}-${subIdx}`, row._id);
+          }
+        }
+      });
+      return index;
+    }
+
+    function resolveReference(ref) {
+      return S.refIndex.get(normalizeRefKey(ref)) ?? null;
+    }
+
+    function renderGuideSection() {
+      const groups = GRAMMAR_SYMBOL_GUIDE.map((group) => `
+        <section class="guide-group">
+          <div class="guide-group-title">${esc(group.group)}</div>
+          <div class="guide-table">
+            ${group.items.map((item) => `
+              <article class="guide-row">
+                <div class="guide-symbol">${esc(item.symbol)}</div>
+                <div class="guide-meaning">${esc(item.meaning)}</div>
+                <div class="guide-examples">
+                  例：${esc(item.examples)}
+                  ${item.note ? `<div class="guide-note">${esc(item.note)}</div>` : ""}
+                </div>
+              </article>
+            `).join("")}
+          </div>
+        </section>
+      `).join("");
+
+      return `
+        <div class="guide-card">
+          <div class="guide-intro">这里整理的是“接续”里常见的语法符号，查到 N、Na、A-くて、V-ば 这类写法时，可以在这里快速对照。</div>
+          ${groups}
+        </div>
+      `;
+    }
+
+    function renderContinuationSection(text) {
+      if (!text || !String(text).trim()) return "";
+      return `
+        <section class="sec">
+          <div class="sec-head">
+            <div class="sec-title">接续</div>
+            <button class="guide-toggle" type="button" data-role="guide-toggle">${S.guideOpen ? "收起符号说明" : "符号说明"}</button>
+          </div>
+          <div class="line">${esc(text)}</div>
+          ${S.guideOpen ? renderGuideSection() : ""}
+        </section>
+      `;
+    }
+
+    function looksJapanese(line) {
+      return /[ぁ-ゖァ-ヺー]/.test(line);
+    }
+
+    function renderExamples(text) {
+      if (!text || !String(text).trim()) return "";
+      const blocks = String(text)
+        .split(/\n\s*\n+/)
+        .map((block) => block.trim())
+        .filter(Boolean);
+
+      const items = blocks.map((block) => {
+        const lines = block.split("\n").map((line) => line.trim()).filter(Boolean);
+        const html = lines.map((line) => {
+          const klass = looksJapanese(line)
+            ? "example-ja"
+            : /[\u4e00-\u9fff]/.test(line)
+              ? "example-zh"
+              : "example-mixed";
+          return `<p class="${klass}">${esc(line)}</p>`;
+        }).join("");
+        return `<article class="example-item">${html}</article>`;
+      }).join("");
+
+      return `
+        <section class="sec examples">
+          <div class="sec-title">例句</div>
+          <div class="examples-list">${items}</div>
         </section>
       `;
     }
@@ -450,6 +793,9 @@
     }
 
     async function fetchDictionaryPayload() {
+      if (window.__GRAMMAR_DICTIONARY_PAYLOAD__) {
+        return window.__GRAMMAR_DICTIONARY_PAYLOAD__;
+      }
       const candidates = ["/api/dictionary", "./dictionary.json"];
       let lastError = null;
       for (const url of candidates) {
@@ -474,17 +820,21 @@
       statusEl.textContent = "正在加载词典...";
       const data = await fetchDictionaryPayload();
       S.rows = (data.rows || []).map((row, idx) => ({ ...row, _id: idx }));
+      S.refIndex = buildReferenceIndex(S.rows);
       applyFilter();
       statusEl.textContent = `已加载 ${S.rows.length} 条，来源：${data.source_file || "dictionary.json"}`;
     }
 
     function applyFilter() {
-      const q = S.query.trim().toLowerCase();
+      const q = normalizeSearchText(S.query);
       S.filtered = S.rows.filter((row) => {
         if (S.kana && firstKana(row) !== S.kana) return false;
         if (!q) return true;
         return rowText(row).includes(q);
       });
+      if (q) {
+        S.filtered.sort((a, b) => compareSearchRows(a, b, q));
+      }
       if (!S.filtered.some((row) => row._id === S.active)) {
         S.active = S.filtered[0]?._id ?? null;
       }
@@ -537,19 +887,33 @@
         <div class="detail-grid">
           ${sec("释义", c["条目释义"])}
           ${sec("句型功能", c["条目句型功能"])}
-          ${sec("接续", c["条目接续"])}
+          ${renderContinuationSection(c["条目接续"])}
           ${sec("详解", c["条目解释"])}
-          ${sec("例句", c["例句原文块"], "examples")}
+          ${renderExamples(c["例句原文块"])}
           ${c["参考项目"] ? `<section class="sec"><div class="sec-title">参考项目</div><div class="line">${esc(c["参考项目"])}</div><div style="margin-top:10px;">${renderRefJumps(c["参考项目"])}</div></section>` : ""}
         </div>
       `;
+      const guideToggle = detailEl.querySelector('[data-role="guide-toggle"]');
+      if (guideToggle) {
+        guideToggle.addEventListener("click", () => {
+          S.guideOpen = !S.guideOpen;
+          renderDetail();
+        });
+      }
       detailEl.querySelectorAll(".jump-chip").forEach((btn) => {
         btn.addEventListener("click", () => {
           const ref = btn.getAttribute("data-ref") || "";
           if (!ref) return;
-          qEl.value = ref;
-          S.query = ref;
           S.kana = "";
+          const targetId = resolveReference(ref);
+          if (targetId !== null) {
+            qEl.value = "";
+            S.query = "";
+            S.active = targetId;
+          } else {
+            qEl.value = ref;
+            S.query = ref;
+          }
           renderKanaGrid();
           applyFilter();
         });

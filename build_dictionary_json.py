@@ -20,9 +20,20 @@ def main() -> None:
         "source_file": DEFAULT_DICT_FILE.name,
     }
 
-    out = Path(__file__).resolve().parent / "dictionary.json"
-    out.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+    root = Path(__file__).resolve().parent
+    json_text = json.dumps(payload, ensure_ascii=False)
+
+    out = root / "dictionary.json"
+    out.write_text(json_text, encoding="utf-8")
+
+    js_out = root / "dictionary_data.js"
+    js_out.write_text(
+        "window.__GRAMMAR_DICTIONARY_PAYLOAD__ = " + json_text + ";\n",
+        encoding="utf-8",
+    )
+
     print(f"Wrote {out} with {len(rows)} rows")
+    print(f"Wrote {js_out} with {len(rows)} rows")
 
 
 if __name__ == "__main__":

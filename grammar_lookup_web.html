@@ -1291,6 +1291,11 @@
       ["はんたい", "反対"],
       ["いう", "言う"],
       ["おもう", "思う"],
+      ["とおもったら", "と思ったら"],
+      ["かとおもったら", "かと思ったら"],
+      ["とおもえば", "と思えば"],
+      ["かとおもえば", "かと思えば"],
+      ["おもえば", "思えば"],
       ["いか", "以下"],
       ["いがい", "以外"],
       ["いご", "以後"],
@@ -1386,12 +1391,34 @@
       return new RegExp(`${escapeRegExp(prefix)}(?:${forms.join("|")})[ぁ-ゖァ-ヺー]*`, "g");
     }
 
+    function buildCompoundInflectionRegex(candidate) {
+      const baseRegex = buildInflectionRegex(candidate);
+      if (!baseRegex) return null;
+      const suffixMatch = candidate.match(/[ぁ-ゖァ-ヺー]+$/);
+      if (!suffixMatch) return null;
+      const prefix = candidate.slice(0, -1);
+      if (!prefix || !/[一-龯々〆〤ヶ]/.test(prefix)) return null;
+      return new RegExp(`[ぁ-ゖァ-ヺー一-龯々〆〤ヶ]{1,4}${baseRegex.source}`, "g");
+    }
+
     function buildHighlightMatchers(candidates) {
       const seen = new Set();
       const matchers = [];
 
       candidates.forEach((candidate) => {
         if (!candidate) return;
+        const compoundRegex = buildCompoundInflectionRegex(candidate);
+        if (compoundRegex) {
+          const compoundKey = `compound:${candidate}`;
+          if (!seen.has(compoundKey)) {
+            seen.add(compoundKey);
+            matchers.push({
+              key: compoundKey,
+              regex: compoundRegex
+            });
+          }
+        }
+
         const exactKey = `exact:${candidate}`;
         if (!seen.has(exactKey)) {
           seen.add(exactKey);
@@ -1764,7 +1791,7 @@
       }
       const c = row.cells || {};
       detailEl.innerHTML = `
-        <div class="detail-path">${highlightText(titleOf(row))} ｜ Excel 行 ${esc(row.row_number)}</div>
+        <div class="detail-path">${esc(titleOf(row))} ｜ Excel 行 ${esc(row.row_number)}</div>
         <h2 class="detail-title">${highlightText(mainLabel(row))}</h2>
         <div class="detail-grid">
           ${sec("释义", c["条目释义"], "compact")}

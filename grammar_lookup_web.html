@@ -193,21 +193,214 @@
       gap: 10px;
       margin-bottom: 12px;
       padding: 0 6px;
+      flex-wrap: wrap;
     }
     .results-title {
       font-size: 15px;
       font-weight: 700;
       color: #5b6471;
     }
+    .results-tools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      margin-left: auto;
+    }
     .results-count {
       color: #9e8d84;
       font-size: 13px;
+    }
+    .depth-tabs {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px;
+      border: 1px solid #eee2d7;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.9);
+    }
+    .depth-tab {
+      border: none;
+      background: transparent;
+      color: #8f837e;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .depth-tab.active {
+      background: #fff1eb;
+      color: #bc5d4c;
+      box-shadow: inset 0 0 0 1px rgba(239, 141, 125, 0.18);
     }
     .list {
       overflow: auto;
       padding-right: 4px;
       display: grid;
       gap: 8px;
+    }
+    .tree-group,
+    .tree-middle,
+    .tree-entry {
+      border: 1px solid #efe7de;
+      border-radius: 18px;
+      background: rgba(255, 251, 246, 0.92);
+    }
+    .tree-group {
+      border-left: 5px solid #e4a291;
+      padding: 10px 12px 10px;
+      background: linear-gradient(180deg, #fffaf7 0%, #fffdfb 100%);
+    }
+    .tree-group.leaf {
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+    .tree-group.leaf:hover {
+      transform: translateY(-1px);
+      border-color: #efc5bb;
+      box-shadow: 0 8px 18px rgba(97, 81, 66, 0.06);
+    }
+    .tree-group.leaf.active {
+      background: linear-gradient(180deg, #fff7f4 0%, #fffdfb 100%);
+      border-color: #efb0a4;
+      box-shadow: 0 10px 24px rgba(239, 141, 125, 0.12);
+    }
+    .tree-middle {
+      margin-top: 8px;
+      margin-left: 12px;
+      border-left: 4px solid #e8c19b;
+      padding: 8px 10px 8px;
+      background: rgba(255, 255, 255, 0.9);
+    }
+    .tree-middle.leaf {
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+    .tree-middle.leaf:hover {
+      transform: translateY(-1px);
+      border-color: #efc5bb;
+      box-shadow: 0 8px 18px rgba(97, 81, 66, 0.06);
+    }
+    .tree-middle.leaf.active {
+      background: linear-gradient(180deg, #fff7f4 0%, #fffdfb 100%);
+      border-color: #efb0a4;
+      box-shadow: 0 10px 24px rgba(239, 141, 125, 0.12);
+    }
+    .tree-entry {
+      margin-top: 8px;
+      margin-left: 14px;
+      border-left: 3px solid #cfd7e3;
+      padding: 9px 12px;
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+    .tree-entry:hover {
+      transform: translateY(-1px);
+      border-color: #efc5bb;
+      box-shadow: 0 8px 18px rgba(97, 81, 66, 0.06);
+    }
+    .tree-entry.active {
+      background: linear-gradient(180deg, #fff7f4 0%, #fffdfb 100%);
+      border-color: #efb0a4;
+      box-shadow: 0 10px 24px rgba(239, 141, 125, 0.12);
+    }
+    .tree-summary {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      cursor: pointer;
+    }
+    .tree-summary::-webkit-details-marker {
+      display: none;
+    }
+    .tree-big-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: #39414d;
+      letter-spacing: -0.01em;
+    }
+    .tree-mid-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #6e5748;
+    }
+    .tree-middle-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .tree-leaf-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+    }
+    .tree-leaf-main {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+    .tree-middle-meaning {
+      flex: 1 1 auto;
+      min-width: 0;
+      color: #8c8580;
+      font-size: 13px;
+      line-height: 1.5;
+      text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tree-badge {
+      color: #9a8e8a;
+      font-size: 12px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid #eadfd5;
+      border-radius: 999px;
+      padding: 2px 8px;
+      white-space: nowrap;
+    }
+    .tree-entry-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .tree-entry-main {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+    .tree-entry-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #37414c;
+      letter-spacing: -0.01em;
+      min-width: 0;
+    }
+    .tree-entry-meaning {
+      flex: 1 1 auto;
+      min-width: 0;
+      color: #8c8580;
+      font-size: 13px;
+      line-height: 1.5;
+      text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .item {
       border: 1px solid #efe7de;
@@ -338,6 +531,12 @@
       font-size: 15px;
       line-height: 1.8;
     }
+    .grammar-hit {
+      background: rgba(239, 141, 125, 0.18);
+      color: inherit;
+      border-radius: 6px;
+      padding: 0 2px;
+    }
     .jump-chip {
       display: inline-flex;
       align-items: center;
@@ -441,6 +640,30 @@
         grid-template-columns: 1fr;
         gap: 4px;
       }
+      .tree-entry-line {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .tree-leaf-head {
+        width: 100%;
+      }
+      .tree-leaf-main {
+        width: 100%;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .tree-entry-main {
+        width: 100%;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .tree-entry-meaning {
+        text-align: left;
+        white-space: normal;
+      }
     }
   </style>
 </head>
@@ -542,7 +765,7 @@
       "る","れ","ろ","わ","を","ん"
     ];
 
-    const S = { rows: [], filtered: [], active: null, kana: "", query: "", guideOpen: false, refIndex: new Map() };
+    const S = { rows: [], filtered: [], active: null, kana: "", query: "", guideOpen: false, refIndex: new Map(), expandDepth: "middle" };
     const listEl = document.getElementById("list");
     const detailEl = document.getElementById("detail");
     const qEl = document.getElementById("q");
@@ -605,6 +828,24 @@
       ].map(normalizeSearchText).join(" ");
     }
 
+    function hierarchySortValue(value) {
+      const text = String(value || "").trim();
+      if (!text) return { type: 2, num: Number.POSITIVE_INFINITY, text: "" };
+      if (/^\d+$/.test(text)) return { type: 0, num: Number(text), text };
+      const normalized = text.normalize("NFKC").toLowerCase();
+      const code = normalized.charCodeAt(0);
+      if (code >= 97 && code <= 122) {
+        return { type: 1, num: code - 97, text: normalized };
+      }
+      return { type: 1, num: Number.POSITIVE_INFINITY, text: normalized };
+    }
+
+    function compareHierarchyPart(a, b) {
+      if (a.type !== b.type) return a.type - b.type;
+      if (a.num !== b.num) return a.num - b.num;
+      return a.text.localeCompare(b.text, "ja");
+    }
+
     function searchScore(row, query) {
       const c = row.cells || {};
       const big = normalizeSearchText(c["大条目"]);
@@ -647,6 +888,41 @@
       return a.row_number - b.row_number;
     }
 
+    function renderLeafLine(title, meaning = "", countLabel = "") {
+      return `
+        <div class="tree-leaf-head">
+          <div class="tree-leaf-main">
+            <div class="tree-entry-title">${esc(title)}</div>
+            <div class="tree-middle-meaning">${esc(meaning)}</div>
+          </div>
+          ${countLabel ? `<div class="tree-badge">${esc(countLabel)}</div>` : ""}
+        </div>
+      `;
+    }
+
+    function compareHierarchyRows(a, b) {
+      const ac = a.cells || {};
+      const bc = b.cells || {};
+      const bigCmp = String(ac["大条目"] || "").localeCompare(String(bc["大条目"] || ""), "ja");
+      if (bigCmp !== 0) return bigCmp;
+      const bigIdxCmp = compareHierarchyPart(
+        hierarchySortValue(ac["大条目序号（带下标数字时填写）"] || ac["大条目序号"]),
+        hierarchySortValue(bc["大条目序号（带下标数字时填写）"] || bc["大条目序号"])
+      );
+      if (bigIdxCmp !== 0) return bigIdxCmp;
+      const midIdxCmp = compareHierarchyPart(
+        hierarchySortValue(ac["中条目序号"]),
+        hierarchySortValue(bc["中条目序号"])
+      );
+      if (midIdxCmp !== 0) return midIdxCmp;
+      const subIdxCmp = compareHierarchyPart(
+        hierarchySortValue(ac["小条目序号"]),
+        hierarchySortValue(bc["小条目序号"])
+      );
+      if (subIdxCmp !== 0) return subIdxCmp;
+      return a.row_number - b.row_number;
+    }
+
     function sec(title, text, extraClass = "") {
       if (!text || !String(text).trim()) return "";
       return `
@@ -665,6 +941,14 @@
 
     function buildReferenceIndex(rows) {
       const index = new Map();
+      const groupAliases = new Map();
+
+      function rememberGroupAlias(alias, rowId) {
+        const key = normalizeRefKey(alias);
+        if (!key || groupAliases.has(key)) return;
+        groupAliases.set(key, rowId);
+      }
+
       rows.forEach((row) => {
         const c = row.cells || {};
         const big = String(c["大条目"] || "").trim();
@@ -673,18 +957,23 @@
         const subIdx = String(c["小条目序号"] || "").trim();
         if (!big) return;
 
-        addRefAlias(index, big, row._id);
-
         if (bigIdx) {
           addRefAlias(index, `${big}#${bigIdx}`, row._id);
           addRefAlias(index, `${big}-${bigIdx}`, row._id);
+          rememberGroupAlias(big, row._id);
+        } else {
+          addRefAlias(index, big, row._id);
         }
 
         if (midIdx) {
-          addRefAlias(index, `${big}-${midIdx}`, row._id);
+          rememberGroupAlias(`${big}-${midIdx}`, row._id);
           if (bigIdx) {
             addRefAlias(index, `${big}#${bigIdx}-${midIdx}`, row._id);
             addRefAlias(index, `${big}-${bigIdx}-${midIdx}`, row._id);
+            rememberGroupAlias(`${big}#${bigIdx}-${midIdx}`, row._id);
+            rememberGroupAlias(`${big}-${bigIdx}-${midIdx}`, row._id);
+          } else {
+            rememberGroupAlias(`${big}-${midIdx}`, row._id);
           }
         }
 
@@ -694,6 +983,11 @@
             addRefAlias(index, `${big}#${bigIdx}-${midIdx}-${subIdx}`, row._id);
             addRefAlias(index, `${big}-${bigIdx}-${midIdx}-${subIdx}`, row._id);
           }
+        }
+      });
+      groupAliases.forEach((rowId, key) => {
+        if (!index.has(key)) {
+          index.set(key, rowId);
         }
       });
       return index;
@@ -748,8 +1042,80 @@
       return /[ぁ-ゖァ-ヺー]/.test(line);
     }
 
-    function renderExamples(text) {
+    const HIGHLIGHT_REPLACEMENTS = [
+      ["にたいして", "に対して"],
+      ["にたいし", "に対し"],
+      ["あいだ", "間"],
+      ["あと", "後"],
+      ["うえ", "上"],
+      ["まえ", "前"],
+      ["さい", "際"],
+      ["とおり", "通り"],
+      ["かわり", "代わり"],
+      ["たい", "対"]
+    ];
+
+    function expandHighlightVariants(token) {
+      const variants = new Set([token]);
+      for (const [from, to] of HIGHLIGHT_REPLACEMENTS) {
+        const snapshot = [...variants];
+        snapshot.forEach((value) => {
+          if (value.includes(from)) {
+            variants.add(value.split(from).join(to));
+          }
+        });
+      }
+      return [...variants];
+    }
+
+    function extractHighlightCandidates(row) {
+      const c = row?.cells || {};
+      const rawTexts = [
+        c["小条目"],
+        c["中条目"],
+        mainLabel(row),
+        c["大条目"]
+      ].filter(Boolean);
+
+      const skipTerms = new Set(["数量词"]);
+      const candidates = new Set();
+      rawTexts.forEach((text) => {
+        const parts = String(text).match(/[ぁ-ゖァ-ヺー一-龯々〆〤ヶ]+/g) || [];
+        parts.forEach((part) => {
+          const token = part.trim();
+          if (!token || token.length < 2 || skipTerms.has(token)) return;
+          expandHighlightVariants(token).forEach((variant) => {
+            if (!variant || variant.length < 2 || skipTerms.has(variant)) return;
+            candidates.add(variant);
+          });
+        });
+      });
+
+      return [...candidates].sort((a, b) => b.length - a.length);
+    }
+
+    function highlightExampleLine(line, candidates) {
+      if (!looksJapanese(line) || !candidates.length) return esc(line);
+      let text = String(line);
+      const tokens = [];
+
+      candidates.forEach((candidate, idx) => {
+        if (!candidate || !text.includes(candidate)) return;
+        const token = `__GRAMMAR_HIT_${idx}__`;
+        text = text.split(candidate).join(token);
+        tokens.push({ token, candidate });
+      });
+
+      let html = esc(text);
+      tokens.forEach(({ token, candidate }) => {
+        html = html.replaceAll(token, `<mark class="grammar-hit">${esc(candidate)}</mark>`);
+      });
+      return html;
+    }
+
+    function renderExamples(text, row) {
       if (!text || !String(text).trim()) return "";
+      const highlightCandidates = extractHighlightCandidates(row);
       const blocks = String(text)
         .split(/\n\s*\n+/)
         .map((block) => block.trim())
@@ -763,7 +1129,10 @@
             : /[\u4e00-\u9fff]/.test(line)
               ? "example-zh"
               : "example-mixed";
-          return `<p class="${klass}">${esc(line)}</p>`;
+          const content = klass === "example-ja"
+            ? highlightExampleLine(line, highlightCandidates)
+            : esc(line);
+          return `<p class="${klass}">${content}</p>`;
         }).join("");
         return `<article class="example-item">${html}</article>`;
       }).join("");
@@ -844,26 +1213,160 @@
 
     function renderResults() {
       listEl.innerHTML = "";
-      resultsCountEl.textContent = `${S.filtered.length} 条`;
+      resultsCountEl.innerHTML = `
+        <div class="results-tools">
+          <div class="depth-tabs">
+            <button class="depth-tab${S.expandDepth === "big" ? " active" : ""}" type="button" data-depth="big">大条目</button>
+            <button class="depth-tab${S.expandDepth === "middle" ? " active" : ""}" type="button" data-depth="middle">中条目</button>
+            <button class="depth-tab${S.expandDepth === "small" ? " active" : ""}" type="button" data-depth="small">小条目</button>
+          </div>
+          <span>${S.filtered.length} 条</span>
+        </div>
+      `;
       if (!S.filtered.length) {
         listEl.innerHTML = `<div class="item"><div class="item-title">没有匹配结果</div><div class="item-desc">可以换一个关键词，或者清除五十音筛选后再试。</div></div>`;
+        bindDepthTabs();
         return;
       }
-      S.filtered.forEach((row) => {
+      const rowsForView = S.query ? S.filtered.slice() : S.filtered.slice().sort(compareHierarchyRows);
+      const groups = new Map();
+      rowsForView.forEach((row) => {
         const c = row.cells || {};
-        const item = document.createElement("div");
-        item.className = `item${row._id === S.active ? " active" : ""}`;
-        item.innerHTML = `
-          <div class="item-title">${esc(mainLabel(row))}</div>
-          <div class="item-path">${esc(titleOf(row))}</div>
-          <div class="item-desc">${esc((c["条目释义"] || c["条目解释"] || "").slice(0, 88))}</div>
+        const big = (c["大条目"] || "").trim() || "未命名大条目";
+        const bigIdx = (c["大条目序号（带下标数字时填写）"] || c["大条目序号"] || "").trim();
+        const groupKey = `${big}@@${bigIdx}`;
+        if (!groups.has(groupKey)) {
+          groups.set(groupKey, { big, bigIdx, directRows: [], mids: new Map() });
+        }
+        const mid = (c["中条目"] || "").trim();
+        const midIdx = (c["中条目序号"] || "").trim();
+        if (!mid) {
+          groups.get(groupKey).directRows.push(row);
+          return;
+        }
+        const midKey = `${mid}@@${midIdx}`;
+        if (!groups.get(groupKey).mids.has(midKey)) {
+          groups.get(groupKey).mids.set(midKey, { mid, midIdx, rows: [] });
+        }
+        groups.get(groupKey).mids.get(midKey).rows.push(row);
+      });
+
+      groups.forEach((group) => {
+        const groupIsLeaf = group.directRows.length === 1 && group.mids.size === 0;
+        if (groupIsLeaf) {
+          const leafRow = group.directRows[0];
+          const c = leafRow.cells || {};
+          const groupLeafEl = document.createElement("div");
+          groupLeafEl.className = `tree-group leaf${leafRow._id === S.active ? " active" : ""}`;
+          groupLeafEl.innerHTML = `
+            ${renderLeafLine(`${group.big}${group.bigIdx ? ` #${group.bigIdx}` : ""}`, c["条目释义"] || "", "1 条")}
+          `;
+          groupLeafEl.addEventListener("click", () => {
+            S.active = leafRow._id;
+            renderResults();
+            renderDetail();
+          });
+          listEl.appendChild(groupLeafEl);
+          return;
+        }
+
+        const groupEl = document.createElement("details");
+        groupEl.className = "tree-group";
+        const groupHasActive = group.directRows.some((row) => row._id === S.active) || [...group.mids.values()].some((mid) => mid.rows.some((row) => row._id === S.active));
+        const groupCount = group.directRows.length + [...group.mids.values()].reduce((sum, mid) => sum + mid.rows.length, 0);
+        groupEl.open = S.expandDepth !== "big";
+        groupEl.innerHTML = `
+          <summary class="tree-summary">
+            <div class="tree-big-title">${esc(group.big)}${group.bigIdx ? `<span style="font-size:13px;color:#9b8f88;"> #${esc(group.bigIdx)}</span>` : ""}</div>
+            <div class="tree-badge">${groupCount} 条</div>
+          </summary>
         `;
-        item.addEventListener("click", () => {
-          S.active = row._id;
-          renderResults();
-          renderDetail();
+
+        group.directRows.forEach((row) => {
+          const c = row.cells || {};
+          const item = document.createElement("div");
+          item.className = `tree-entry${row._id === S.active ? " active" : ""}`;
+          item.innerHTML = `
+            <div class="tree-entry-line">
+              <div class="tree-entry-main">
+                <div class="tree-entry-title">${esc(mainLabel(row))}</div>
+                <div class="tree-entry-meaning">${esc(c["条目释义"] || "")}</div>
+              </div>
+            </div>
+          `;
+          item.addEventListener("click", () => {
+            S.active = row._id;
+            renderResults();
+            renderDetail();
+          });
+          groupEl.appendChild(item);
         });
-        listEl.appendChild(item);
+
+        group.mids.forEach((mid) => {
+          const leafRow = mid.rows.length === 1 && !String(mid.rows[0].cells?.["小条目"] || "").trim() ? mid.rows[0] : null;
+          if (leafRow) {
+            const c = leafRow.cells || {};
+            const midLeafEl = document.createElement("div");
+            midLeafEl.className = `tree-middle leaf${leafRow._id === S.active ? " active" : ""}`;
+            midLeafEl.innerHTML = `
+              ${renderLeafLine(`${mid.mid}${mid.midIdx ? ` #${mid.midIdx}` : ""}`, c["条目释义"] || "", "1 条")}
+            `;
+            midLeafEl.addEventListener("click", () => {
+              S.active = leafRow._id;
+              renderResults();
+              renderDetail();
+            });
+            groupEl.appendChild(midLeafEl);
+            return;
+          }
+
+          const midEl = document.createElement("details");
+          midEl.className = "tree-middle";
+          const midHasActive = mid.rows.some((row) => row._id === S.active);
+          midEl.open = S.expandDepth === "small";
+          midEl.innerHTML = `
+            <summary class="tree-summary">
+              <div class="tree-mid-title">${esc(mid.mid)}${mid.midIdx ? `<span style="font-size:12px;color:#9b8f88;"> #${esc(mid.midIdx)}</span>` : ""}</div>
+              <div class="tree-badge">${mid.rows.length} 条</div>
+            </summary>
+          `;
+
+          mid.rows.forEach((row) => {
+            const c = row.cells || {};
+            const item = document.createElement("div");
+            item.className = `tree-entry${row._id === S.active ? " active" : ""}`;
+            item.innerHTML = `
+              <div class="tree-entry-line">
+                <div class="tree-entry-main">
+                  <div class="tree-entry-title">${esc(mainLabel(row))}</div>
+                  <div class="tree-entry-meaning">${esc(c["条目释义"] || "")}</div>
+                </div>
+              </div>
+            `;
+            item.addEventListener("click", () => {
+              S.active = row._id;
+              renderResults();
+              renderDetail();
+            });
+            midEl.appendChild(item);
+          });
+
+          groupEl.appendChild(midEl);
+        });
+
+        listEl.appendChild(groupEl);
+      });
+      bindDepthTabs();
+    }
+
+    function bindDepthTabs() {
+      resultsCountEl.querySelectorAll("[data-depth]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const depth = btn.getAttribute("data-depth");
+          if (!depth || depth === S.expandDepth) return;
+          S.expandDepth = depth;
+          renderResults();
+        });
       });
     }
 
@@ -889,7 +1392,7 @@
           ${sec("句型功能", c["条目句型功能"])}
           ${renderContinuationSection(c["条目接续"])}
           ${sec("详解", c["条目解释"])}
-          ${renderExamples(c["例句原文块"])}
+          ${renderExamples(c["例句原文块"], row)}
           ${c["参考项目"] ? `<section class="sec"><div class="sec-title">参考项目</div><div class="line">${esc(c["参考项目"])}</div><div style="margin-top:10px;">${renderRefJumps(c["参考项目"])}</div></section>` : ""}
         </div>
       `;

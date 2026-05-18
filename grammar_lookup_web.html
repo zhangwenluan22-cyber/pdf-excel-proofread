@@ -85,6 +85,30 @@
       min-height: 62px;
       box-shadow: 0 10px 28px rgba(239, 141, 125, 0.08);
     }
+    .search-filters {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .search-filter {
+      border: 1px solid #eadfd5;
+      background: rgba(255, 255, 255, 0.8);
+      color: #8b817b;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+    .search-filter.active {
+      background: #fff1eb;
+      color: #bc5d4c;
+      border-color: #efc5bb;
+      box-shadow: inset 0 0 0 1px rgba(239, 141, 125, 0.14);
+    }
     .search-icon {
       color: var(--accent);
       font-size: 24px;
@@ -331,6 +355,28 @@
       font-weight: 800;
       color: #6e5748;
     }
+    .tree-title-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .tree-index-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      padding: 1px 7px;
+      border-radius: 999px;
+      border: 1px solid #eadfd5;
+      background: rgba(255, 255, 255, 0.86);
+      color: #a08f86;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.4;
+      letter-spacing: 0.01em;
+      flex: 0 0 auto;
+    }
     .tree-middle-line {
       display: flex;
       align-items: center;
@@ -361,6 +407,20 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    .result-snippet {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      max-width: 100%;
+      min-width: 0;
+      vertical-align: top;
+    }
+    .result-snippet-text {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .tree-badge {
       color: #9a8e8a;
@@ -401,6 +461,27 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    .match-tags {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      flex: 0 0 auto;
+    }
+    .match-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: #fff6f1;
+      border: 1px solid #f2d7cc;
+      color: #b87364;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.35;
+      white-space: nowrap;
     }
     .item {
       border: 1px solid #efe7de;
@@ -495,19 +576,38 @@
     .line {
       white-space: pre-wrap;
       line-height: 1.75;
-      font-size: 16px;
+      font-size: 15px;
       color: #39414d;
+    }
+    .sec.compact {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      padding: 14px 18px;
+    }
+    .sec.compact .sec-title {
+      margin-bottom: 0;
+      flex: 0 0 auto;
+    }
+    .sec.compact .line {
+      flex: 1 1 auto;
+      min-width: 0;
+      font-size: 14px;
+      line-height: 1.6;
+      white-space: normal;
     }
     .examples {
       padding: 18px 18px 14px;
     }
     .examples-list {
       display: grid;
-      gap: 18px;
+      gap: 12px;
     }
     .example-item {
       display: grid;
-      gap: 4px;
+      gap: 2px;
+      padding-left: 12px;
+      border-left: 3px solid #f0d8d1;
     }
     .example-ja,
     .example-zh,
@@ -517,25 +617,32 @@
     }
     .example-ja {
       color: #313844;
-      font-size: 17px;
-      line-height: 1.85;
+      font-size: 15px;
+      line-height: 1.7;
       letter-spacing: -0.01em;
     }
     .example-zh {
       color: #98928f;
-      font-size: 15px;
-      line-height: 1.8;
+      font-size: 13px;
+      line-height: 1.65;
     }
     .example-mixed {
       color: #5b6471;
-      font-size: 15px;
-      line-height: 1.8;
+      font-size: 13px;
+      line-height: 1.65;
     }
     .grammar-hit {
       background: rgba(239, 141, 125, 0.18);
       color: inherit;
       border-radius: 6px;
       padding: 0 2px;
+    }
+    .search-hit {
+      background: rgba(255, 218, 132, 0.42);
+      color: inherit;
+      border-radius: 6px;
+      padding: 0 2px;
+      box-shadow: inset 0 -1px 0 rgba(228, 160, 27, 0.22);
     }
     .jump-chip {
       display: inline-flex;
@@ -664,6 +771,23 @@
         text-align: left;
         white-space: normal;
       }
+      .result-snippet {
+        display: inline-grid;
+        gap: 4px;
+      }
+      .result-snippet-text {
+        white-space: normal;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
+      .match-tags {
+        justify-content: flex-start;
+      }
+      .sec.compact {
+        display: grid;
+        gap: 6px;
+      }
     }
   </style>
 </head>
@@ -683,6 +807,7 @@
         <input id="q" type="text" placeholder="输入语法、释义、接续、例句关键词" />
         <button id="clearBtn" class="clear-btn" type="button" aria-label="清空">×</button>
       </div>
+      <div id="searchFilters" class="search-filters"></div>
 
       <div class="kana-wrap">
         <div class="kana-head">
@@ -765,13 +890,22 @@
       "る","れ","ろ","わ","を","ん"
     ];
 
-    const S = { rows: [], filtered: [], active: null, kana: "", query: "", guideOpen: false, refIndex: new Map(), expandDepth: "middle" };
+    const SEARCH_FIELDS = [
+      { key: "all", label: "全部" },
+      { key: "title", label: "标题" },
+      { key: "meaning", label: "释义" },
+      { key: "explanation", label: "详解" },
+      { key: "examples", label: "例句" }
+    ];
+
+    const S = { rows: [], filtered: [], active: null, kana: "", query: "", guideOpen: false, refIndex: new Map(), expandDepth: "middle", searchFields: ["all"] };
     const listEl = document.getElementById("list");
     const detailEl = document.getElementById("detail");
     const qEl = document.getElementById("q");
     const statusEl = document.getElementById("status");
     const resultsCountEl = document.getElementById("resultsCount");
     const clearBtn = document.getElementById("clearBtn");
+    const searchFiltersEl = document.getElementById("searchFilters");
     const kanaGrid = document.getElementById("kanaGrid");
     const kanaResetBtn = document.getElementById("kanaResetBtn");
 
@@ -828,6 +962,32 @@
       ].map(normalizeSearchText).join(" ");
     }
 
+    function getSearchFieldDefs(row) {
+      const c = row.cells || {};
+      return {
+        title: [c["大条目"], c["中条目"], c["小条目"], mainLabel(row)].filter(Boolean).join(" "),
+        meaning: c["条目释义"] || "",
+        explanation: c["条目解释"] || "",
+        examples: c["例句原文块"] || "",
+        continuation: c["条目接续"] || "",
+        function: c["条目句型功能"] || "",
+        references: c["参考项目"] || ""
+      };
+    }
+
+    function activeSearchKeys() {
+      if (S.searchFields.includes("all")) {
+        return ["title", "meaning", "explanation", "examples", "continuation", "function", "references"];
+      }
+      return S.searchFields.slice();
+    }
+
+    function rowMatchesQuery(row, query) {
+      if (!query) return true;
+      const fields = getSearchFieldDefs(row);
+      return activeSearchKeys().some((key) => normalizeSearchText(fields[key]).includes(query));
+    }
+
     function hierarchySortValue(value) {
       const text = String(value || "").trim();
       if (!text) return { type: 2, num: Number.POSITIVE_INFINITY, text: "" };
@@ -847,36 +1007,30 @@
     }
 
     function searchScore(row, query) {
-      const c = row.cells || {};
-      const big = normalizeSearchText(c["大条目"]);
-      const mid = normalizeSearchText(c["中条目"]);
-      const sub = normalizeSearchText(c["小条目"]);
-      const main = normalizeSearchText(mainLabel(row));
-      const meaning = normalizeSearchText(c["条目释义"]);
-      const explanation = normalizeSearchText(c["条目解释"]);
-      const continuation = normalizeSearchText(c["条目接续"]);
-      const examples = normalizeSearchText(c["例句原文块"]);
-      const refs = normalizeSearchText(c["参考项目"]);
-
-      const titleFields = [sub, mid, big, main];
-      const detailFields = [meaning, explanation, continuation, examples, refs];
+      const fields = getSearchFieldDefs(row);
+      const normalized = Object.fromEntries(Object.entries(fields).map(([key, value]) => [key, normalizeSearchText(value)]));
+      const keys = activeSearchKeys();
 
       let score = 0;
-      for (const field of titleFields) {
-        if (!field) continue;
-        if (field === query) score = Math.max(score, 1200);
-        else if (field.startsWith(query)) score = Math.max(score, 900);
-        else if (field.includes(query)) score = Math.max(score, 700);
+      if (keys.includes("title")) {
+        const field = normalized.title;
+        if (field) {
+          if (field === query) score = Math.max(score, 1200);
+          else if (field.startsWith(query)) score = Math.max(score, 900);
+          else if (field.includes(query)) score = Math.max(score, 700);
+        }
       }
 
-      for (const field of detailFields) {
-        if (!field) continue;
+      ["meaning", "explanation", "continuation", "examples", "references", "function"].forEach((key) => {
+        if (!keys.includes(key)) return;
+        const field = normalized[key];
+        if (!field) return;
         if (field === query) score = Math.max(score, 420);
         else if (field.startsWith(query)) score = Math.max(score, 300);
         else if (field.includes(query)) score = Math.max(score, 180);
-      }
+      });
 
-      const mainLen = main ? main.length : 9999;
+      const mainLen = normalized.title ? normalized.title.length : 9999;
       return { score, mainLen };
     }
 
@@ -888,14 +1042,103 @@
       return a.row_number - b.row_number;
     }
 
-    function renderLeafLine(title, meaning = "", countLabel = "") {
+    function highlightEscapedSegment(html, query = S.query, className = "search-hit") {
+      const needle = String(query || "").trim();
+      if (!needle) return html;
+      const regex = new RegExp(escapeRegExp(needle), "gi");
+      return html.replace(regex, (match) => `<mark class="${className}">${match}</mark>`);
+    }
+
+    function highlightText(text, query = S.query, className = "search-hit") {
+      if (text === null || text === undefined) return "";
+      return highlightEscapedSegment(esc(String(text)), query, className);
+    }
+
+    function highlightHtmlPreservingTags(html, query = S.query, className = "search-hit") {
+      const needle = String(query || "").trim();
+      if (!needle) return html;
+      return String(html)
+        .split(/(<[^>]+>)/g)
+        .map((part) => (part.startsWith("<") ? part : highlightEscapedSegment(part, needle, className)))
+        .join("");
+    }
+
+    function searchMatchLabels(row) {
+      const q = normalizeSearchText(S.query);
+      if (!q) return [];
+      const fields = getSearchFieldDefs(row);
+      const defs = [
+        { key: "title", label: "标题" },
+        { key: "meaning", label: "释义" },
+        { key: "function", label: "句型" },
+        { key: "continuation", label: "接续" },
+        { key: "explanation", label: "详解" },
+        { key: "examples", label: "例句" },
+        { key: "references", label: "参考" }
+      ];
+      const activeKeys = new Set(activeSearchKeys());
+      return defs
+        .filter((item) => activeKeys.has(item.key) && normalizeSearchText(fields[item.key]).includes(q))
+        .map((item) => item.label);
+    }
+
+    function renderMatchTags(row) {
+      const labels = searchMatchLabels(row);
+      if (!labels.length) return "";
+      const primary = labels.find((label) => label !== "标题") || labels[0];
+      return `<div class="match-tags"><span class="match-tag">${esc(primary)}</span></div>`;
+    }
+
+    function resultSecondaryHtml(row) {
+      const c = row.cells || {};
+      return highlightText(c["条目释义"] || "");
+    }
+
+    function renderSearchFilters() {
+      searchFiltersEl.innerHTML = SEARCH_FIELDS.map((item) => `
+        <button class="search-filter${S.searchFields.includes(item.key) ? " active" : ""}" type="button" data-search-field="${item.key}">${item.label}</button>
+      `).join("");
+      searchFiltersEl.querySelectorAll("[data-search-field]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const next = btn.getAttribute("data-search-field") || "all";
+          if (next === "all") {
+            S.searchFields = ["all"];
+          } else {
+            const current = new Set(S.searchFields);
+            current.delete("all");
+            if (current.has(next)) {
+              current.delete(next);
+            } else {
+              current.add(next);
+            }
+            S.searchFields = current.size ? [...current] : ["all"];
+          }
+          renderSearchFilters();
+          applyFilter();
+        });
+      });
+    }
+
+    function renderLeafLine(title, meaning = "", countLabel = "", tagsHtml = "") {
       return `
         <div class="tree-leaf-head">
           <div class="tree-leaf-main">
-            <div class="tree-entry-title">${esc(title)}</div>
-            <div class="tree-middle-meaning">${esc(meaning)}</div>
+            ${title}
+            <div class="tree-middle-meaning">${meaning}</div>
           </div>
+          ${tagsHtml}
           ${countLabel ? `<div class="tree-badge">${esc(countLabel)}</div>` : ""}
+        </div>
+      `;
+    }
+
+    function renderTreeTitle(label, idx = "", titleClass = "tree-entry-title", highlight = false) {
+      const safeLabel = highlight ? highlightText(label) : esc(label || "");
+      const safeIdx = esc(String(idx || "").trim());
+      return `
+        <div class="tree-title-wrap">
+          <div class="${titleClass}">${safeLabel}</div>
+          ${safeIdx ? `<span class="tree-index-chip">${safeIdx}</span>` : ""}
         </div>
       `;
     }
@@ -928,7 +1171,7 @@
       return `
         <section class="sec ${extraClass}">
           <div class="sec-title">${esc(title)}</div>
-          <div class="line">${esc(text)}</div>
+          <div class="line">${highlightText(text)}</div>
         </section>
       `;
     }
@@ -1045,6 +1288,44 @@
     const HIGHLIGHT_REPLACEMENTS = [
       ["にたいして", "に対して"],
       ["にたいし", "に対し"],
+      ["はんたい", "反対"],
+      ["いう", "言う"],
+      ["おもう", "思う"],
+      ["いか", "以下"],
+      ["いがい", "以外"],
+      ["いご", "以後"],
+      ["いじょう", "以上"],
+      ["いぜん", "以前"],
+      ["いちど", "一度"],
+      ["いっぽう", "一方"],
+      ["いない", "以内"],
+      ["いらい", "以来"],
+      ["いまごろ", "今ごろ"],
+      ["いまさら", "今さら"],
+      ["いまに", "今に"],
+      ["いまや", "今や"],
+      ["かぎり", "限り"],
+      ["かりそめ", "仮初"],
+      ["けっか", "結果"],
+      ["けっきょく", "結局"],
+      ["げんざい", "現在"],
+      ["かえる", "変える"],
+      ["かえる", "替える"],
+      ["かえる", "換える"],
+      ["かける", "掛ける"],
+      ["かさいご", "最後"],
+      ["さいご", "最後"],
+      ["このたび", "この度"],
+      ["さいちゅう", "最中"],
+      ["おそれ", "恐れ"],
+      ["おなじ", "同じ"],
+      ["おぼえ", "覚え"],
+      ["いたす", "致す"],
+      ["いただく", "頂く"],
+      ["ねがう", "願う"],
+      ["あらためる", "改める"],
+      ["あがる", "上がる"],
+      ["あげる", "上げる"],
       ["あいだ", "間"],
       ["あと", "後"],
       ["うえ", "上"],
@@ -1068,6 +1349,86 @@
       return [...variants];
     }
 
+    function escapeRegExp(text) {
+      return String(text).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    function buildInflectionRegex(candidate) {
+      if (!candidate || candidate.length < 2) return null;
+      const suffixMatch = candidate.match(/[ぁ-ゖァ-ヺー]+$/);
+      if (!suffixMatch) return null;
+
+      const lastKana = suffixMatch[0].slice(-1);
+      const prefix = candidate.slice(0, -1);
+      if (!prefix) return null;
+
+      const groups = {
+        "う": ["う", "い", "わ", "え", "お", "っ"],
+        "く": ["く", "き", "か", "け", "こ", "い"],
+        "ぐ": ["ぐ", "ぎ", "が", "げ", "ご", "い"],
+        "す": ["す", "し", "さ", "せ", "そ"],
+        "つ": ["つ", "ち", "た", "て", "と", "っ"],
+        "ぬ": ["ぬ", "に", "な", "ね", "の", "ん"],
+        "ぶ": ["ぶ", "び", "ば", "べ", "ぼ", "ん"],
+        "む": ["む", "み", "ま", "め", "も", "ん"],
+        "る": ["る", "り", "ら", "れ", "ろ", "よ", "っ"],
+        "る_ichidan": ["る", "れ", "ろ", "よ", "た", "て"]
+      };
+
+      let forms = null;
+      if (lastKana === "る" && /[いえ]る$/.test(candidate)) {
+        forms = groups["る_ichidan"];
+      } else {
+        forms = groups[lastKana];
+      }
+      if (!forms) return null;
+
+      return new RegExp(`${escapeRegExp(prefix)}(?:${forms.join("|")})[ぁ-ゖァ-ヺー]*`, "g");
+    }
+
+    function buildHighlightMatchers(candidates) {
+      const seen = new Set();
+      const matchers = [];
+
+      candidates.forEach((candidate) => {
+        if (!candidate) return;
+        const exactKey = `exact:${candidate}`;
+        if (!seen.has(exactKey)) {
+          seen.add(exactKey);
+          matchers.push({
+            key: exactKey,
+            regex: new RegExp(escapeRegExp(candidate), "g")
+          });
+        }
+
+        const inflectionRegex = buildInflectionRegex(candidate);
+        if (inflectionRegex) {
+          const inflectKey = `inflect:${candidate}`;
+          if (!seen.has(inflectKey)) {
+            seen.add(inflectKey);
+            matchers.push({
+              key: inflectKey,
+              regex: inflectionRegex
+            });
+          }
+        }
+
+        const stemmed = candidate.replace(/[ぁ-ゖァ-ヺー]+$/, "");
+        if (stemmed && stemmed !== candidate && stemmed.length >= 2 && /[一-龯々〆〤ヶ]/.test(stemmed)) {
+          const stemKey = `stem:${stemmed}`;
+          if (!seen.has(stemKey)) {
+            seen.add(stemKey);
+            matchers.push({
+              key: stemKey,
+              regex: new RegExp(`${escapeRegExp(stemmed)}[ぁ-ゖァ-ヺー]*`, "g")
+            });
+          }
+        }
+      });
+
+      return matchers;
+    }
+
     function extractHighlightCandidates(row) {
       const c = row?.cells || {};
       const rawTexts = [
@@ -1085,7 +1446,8 @@
           const token = part.trim();
           if (!token || token.length < 2 || skipTerms.has(token)) return;
           expandHighlightVariants(token).forEach((variant) => {
-            if (!variant || variant.length < 2 || skipTerms.has(variant)) return;
+            if (!variant || skipTerms.has(variant)) return;
+            if (variant.length < 2 && variant === token) return;
             candidates.add(variant);
           });
         });
@@ -1098,19 +1460,28 @@
       if (!looksJapanese(line) || !candidates.length) return esc(line);
       let text = String(line);
       const tokens = [];
+      const matchers = buildHighlightMatchers(candidates);
 
-      candidates.forEach((candidate, idx) => {
-        if (!candidate || !text.includes(candidate)) return;
-        const token = `__GRAMMAR_HIT_${idx}__`;
-        text = text.split(candidate).join(token);
-        tokens.push({ token, candidate });
+      matchers.forEach((matcher, idx) => {
+        matcher.regex.lastIndex = 0;
+        text = text.replace(matcher.regex, (match) => {
+          const token = `__GRAMMAR_HIT_${idx}_${tokens.length}__`;
+          tokens.push({ token, match });
+          return token;
+        });
       });
 
       let html = esc(text);
-      tokens.forEach(({ token, candidate }) => {
-        html = html.replaceAll(token, `<mark class="grammar-hit">${esc(candidate)}</mark>`);
+      tokens.forEach(({ token, match }) => {
+        html = html.replaceAll(token, `<mark class="grammar-hit">${esc(match)}</mark>`);
       });
-      return html;
+      return highlightHtmlPreservingTags(html);
+    }
+
+    function classifyExampleLine(line) {
+      if (looksJapanese(line)) return "example-ja";
+      if (/[\u4e00-\u9fff]/.test(line)) return "example-zh";
+      return "example-mixed";
     }
 
     function renderExamples(text, row) {
@@ -1123,15 +1494,22 @@
 
       const items = blocks.map((block) => {
         const lines = block.split("\n").map((line) => line.trim()).filter(Boolean);
-        const html = lines.map((line) => {
-          const klass = looksJapanese(line)
-            ? "example-ja"
-            : /[\u4e00-\u9fff]/.test(line)
-              ? "example-zh"
-              : "example-mixed";
+        const mergedLines = [];
+
+        lines.forEach((line) => {
+          const klass = classifyExampleLine(line);
+          const prev = mergedLines[mergedLines.length - 1];
+          if (prev && prev.klass === klass) {
+            prev.text += line;
+            return;
+          }
+          mergedLines.push({ klass, text: line });
+        });
+
+        const html = mergedLines.map(({ klass, text: mergedText }) => {
           const content = klass === "example-ja"
-            ? highlightExampleLine(line, highlightCandidates)
-            : esc(line);
+            ? highlightExampleLine(mergedText, highlightCandidates)
+            : highlightText(mergedText);
           return `<p class="${klass}">${content}</p>`;
         }).join("");
         return `<article class="example-item">${html}</article>`;
@@ -1153,7 +1531,7 @@
         btn.textContent = kana;
         btn.type = "button";
         btn.addEventListener("click", () => {
-          S.kana = kana;
+          S.kana = S.kana === kana ? "" : kana;
           renderKanaGrid();
           applyFilter();
         });
@@ -1198,8 +1576,7 @@
       const q = normalizeSearchText(S.query);
       S.filtered = S.rows.filter((row) => {
         if (S.kana && firstKana(row) !== S.kana) return false;
-        if (!q) return true;
-        return rowText(row).includes(q);
+        return rowMatchesQuery(row, q);
       });
       if (q) {
         S.filtered.sort((a, b) => compareSearchRows(a, b, q));
@@ -1259,7 +1636,7 @@
           const groupLeafEl = document.createElement("div");
           groupLeafEl.className = `tree-group leaf${leafRow._id === S.active ? " active" : ""}`;
           groupLeafEl.innerHTML = `
-            ${renderLeafLine(`${group.big}${group.bigIdx ? ` #${group.bigIdx}` : ""}`, c["条目释义"] || "", "1 条")}
+            ${renderLeafLine(renderTreeTitle(group.big, group.bigIdx, "tree-entry-title", !!S.query), resultSecondaryHtml(leafRow), "1 条", renderMatchTags(leafRow))}
           `;
           groupLeafEl.addEventListener("click", () => {
             S.active = leafRow._id;
@@ -1277,7 +1654,7 @@
         groupEl.open = S.expandDepth !== "big";
         groupEl.innerHTML = `
           <summary class="tree-summary">
-            <div class="tree-big-title">${esc(group.big)}${group.bigIdx ? `<span style="font-size:13px;color:#9b8f88;"> #${esc(group.bigIdx)}</span>` : ""}</div>
+            ${renderTreeTitle(group.big, group.bigIdx, "tree-big-title", !!S.query)}
             <div class="tree-badge">${groupCount} 条</div>
           </summary>
         `;
@@ -1289,9 +1666,10 @@
           item.innerHTML = `
             <div class="tree-entry-line">
               <div class="tree-entry-main">
-                <div class="tree-entry-title">${esc(mainLabel(row))}</div>
-                <div class="tree-entry-meaning">${esc(c["条目释义"] || "")}</div>
+                <div class="tree-entry-title">${highlightText(mainLabel(row))}</div>
+                <div class="tree-entry-meaning">${resultSecondaryHtml(row)}</div>
               </div>
+              ${renderMatchTags(row)}
             </div>
           `;
           item.addEventListener("click", () => {
@@ -1309,7 +1687,7 @@
             const midLeafEl = document.createElement("div");
             midLeafEl.className = `tree-middle leaf${leafRow._id === S.active ? " active" : ""}`;
             midLeafEl.innerHTML = `
-              ${renderLeafLine(`${mid.mid}${mid.midIdx ? ` #${mid.midIdx}` : ""}`, c["条目释义"] || "", "1 条")}
+              ${renderLeafLine(renderTreeTitle(mid.mid, mid.midIdx, "tree-entry-title", !!S.query), resultSecondaryHtml(leafRow), "1 条", renderMatchTags(leafRow))}
             `;
             midLeafEl.addEventListener("click", () => {
               S.active = leafRow._id;
@@ -1326,7 +1704,7 @@
           midEl.open = S.expandDepth === "small";
           midEl.innerHTML = `
             <summary class="tree-summary">
-              <div class="tree-mid-title">${esc(mid.mid)}${mid.midIdx ? `<span style="font-size:12px;color:#9b8f88;"> #${esc(mid.midIdx)}</span>` : ""}</div>
+              ${renderTreeTitle(mid.mid, mid.midIdx, "tree-mid-title", !!S.query)}
               <div class="tree-badge">${mid.rows.length} 条</div>
             </summary>
           `;
@@ -1338,9 +1716,10 @@
             item.innerHTML = `
               <div class="tree-entry-line">
                 <div class="tree-entry-main">
-                  <div class="tree-entry-title">${esc(mainLabel(row))}</div>
-                  <div class="tree-entry-meaning">${esc(c["条目释义"] || "")}</div>
+                  <div class="tree-entry-title">${highlightText(mainLabel(row))}</div>
+                  <div class="tree-entry-meaning">${resultSecondaryHtml(row)}</div>
                 </div>
+                ${renderMatchTags(row)}
               </div>
             `;
             item.addEventListener("click", () => {
@@ -1385,15 +1764,15 @@
       }
       const c = row.cells || {};
       detailEl.innerHTML = `
-        <div class="detail-path">${esc(titleOf(row))} ｜ Excel 行 ${esc(row.row_number)}</div>
-        <h2 class="detail-title">${esc(mainLabel(row))}</h2>
+        <div class="detail-path">${highlightText(titleOf(row))} ｜ Excel 行 ${esc(row.row_number)}</div>
+        <h2 class="detail-title">${highlightText(mainLabel(row))}</h2>
         <div class="detail-grid">
-          ${sec("释义", c["条目释义"])}
-          ${sec("句型功能", c["条目句型功能"])}
+          ${sec("释义", c["条目释义"], "compact")}
+          ${sec("句型功能", c["条目句型功能"], "compact")}
           ${renderContinuationSection(c["条目接续"])}
           ${sec("详解", c["条目解释"])}
           ${renderExamples(c["例句原文块"], row)}
-          ${c["参考项目"] ? `<section class="sec"><div class="sec-title">参考项目</div><div class="line">${esc(c["参考项目"])}</div><div style="margin-top:10px;">${renderRefJumps(c["参考项目"])}</div></section>` : ""}
+          ${c["参考项目"] ? `<section class="sec"><div class="sec-title">参考项目</div><div style="margin-top:10px;">${renderRefJumps(c["参考项目"])}</div></section>` : ""}
         </div>
       `;
       const guideToggle = detailEl.querySelector('[data-role="guide-toggle"]');
@@ -1441,6 +1820,7 @@
       applyFilter();
     });
 
+    renderSearchFilters();
     renderKanaGrid();
     loadDict().catch((e) => {
       statusEl.textContent = `加载失败：${e.message}`;

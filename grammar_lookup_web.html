@@ -84,8 +84,8 @@
       border: 2px solid rgba(109, 138, 121, 0.45);
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.92);
-      padding: 0 18px;
-      min-height: 62px;
+      padding: 0 16px;
+      min-height: 54px;
       box-shadow: 0 10px 28px rgba(109, 138, 121, 0.08);
     }
     .search-filters {
@@ -124,10 +124,13 @@
       outline: none;
       background: transparent;
       font: inherit;
-      font-size: clamp(20px, 2.2vw, 28px);
+      font-size: clamp(17px, 1.8vw, 22px);
       color: #313844;
     }
-    #q::placeholder { color: #9ba59f; }
+    #q::placeholder {
+      color: #9ba59f;
+      font-size: 0.88em;
+    }
     .clear-btn {
       border: none;
       background: transparent;
@@ -149,10 +152,27 @@
       gap: 10px;
       flex-wrap: wrap;
     }
+    .kana-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
     .kana-title {
       font-size: 14px;
       color: #728078;
       font-weight: 700;
+    }
+    .kana-toggle {
+      border: none;
+      background: transparent;
+      color: #5f7b68;
+      font: inherit;
+      cursor: pointer;
+      padding: 0;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
     }
     .kana-reset {
       border: none;
@@ -163,20 +183,34 @@
       padding: 0;
       font-size: 13px;
     }
+    .kana-grid-wrap {
+      overflow: hidden;
+      max-height: 280px;
+      transition: max-height 0.22s ease, opacity 0.18s ease;
+    }
+    .kana-grid-wrap.collapsed {
+      max-height: 0;
+      opacity: 0;
+    }
     .kana-grid {
-      display: grid;
-      grid-template-columns: repeat(10, minmax(0, 1fr));
-      gap: 6px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      gap: 6px 8px;
     }
     .kana-btn {
+      flex: 0 1 104px;
+      min-width: 86px;
       border: 1px solid #dbe3db;
       background: rgba(255, 255, 255, 0.9);
-      border-radius: 16px;
-      padding: 8px 0;
+      border-radius: 14px;
+      padding: 6px 0;
       cursor: pointer;
       color: #67746d;
       font: inherit;
       font-weight: 700;
+      font-size: 15px;
+      line-height: 1.2;
       transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
     }
     .kana-btn:hover {
@@ -755,7 +789,10 @@
       color: #8a7a73;
     }
     @media (max-width: 1280px) {
-      .kana-grid { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+      .kana-btn {
+        flex-basis: 96px;
+        min-width: 80px;
+      }
     }
     @media (max-width: 980px) {
       body {
@@ -771,8 +808,18 @@
         max-height: none;
         min-height: auto;
       }
-      .kana-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-      .search-shell { min-height: 64px; }
+      .kana-grid {
+        justify-content: flex-start;
+        gap: 6px;
+      }
+      .kana-btn {
+        flex: 1 1 calc(20% - 6px);
+        min-width: 64px;
+        max-width: 88px;
+        padding: 7px 0;
+        font-size: 14px;
+      }
+      .search-shell { min-height: 56px; }
       #q { font-size: 20px; }
       .guide-row {
         grid-template-columns: 1fr;
@@ -850,9 +897,14 @@
       <div class="kana-wrap">
         <div class="kana-head">
           <div class="kana-title">按五十音浏览</div>
-          <button id="kanaResetBtn" class="kana-reset" type="button">清除假名筛选</button>
+          <div class="kana-actions">
+            <button id="kanaToggleBtn" class="kana-toggle" type="button">收起五十音</button>
+            <button id="kanaResetBtn" class="kana-reset" type="button">清除假名筛选</button>
+          </div>
         </div>
-        <div id="kanaGrid" class="kana-grid"></div>
+        <div id="kanaGridWrap" class="kana-grid-wrap">
+          <div id="kanaGrid" class="kana-grid"></div>
+        </div>
       </div>
     </section>
 
@@ -936,15 +988,28 @@
       { key: "examples", label: "例句" }
     ];
 
-    const S = { rows: [], filtered: [], active: null, kana: "", query: "", guideOpen: false, refIndex: new Map(), expandDepth: "middle", searchFields: ["all"] };
+    const S = {
+      rows: [],
+      filtered: [],
+      active: null,
+      kana: "",
+      query: "",
+      guideOpen: false,
+      refIndex: new Map(),
+      expandDepth: "middle",
+      searchFields: ["all"],
+      kanaOpen: !window.matchMedia("(max-height: 920px)").matches
+    };
     const listEl = document.getElementById("list");
     const detailEl = document.getElementById("detail");
     const qEl = document.getElementById("q");
     const statusEl = document.getElementById("status");
     const resultsCountEl = document.getElementById("resultsCount");
     const clearBtn = document.getElementById("clearBtn");
+    const kanaToggleBtn = document.getElementById("kanaToggleBtn");
     const searchFiltersEl = document.getElementById("searchFilters");
     const kanaGrid = document.getElementById("kanaGrid");
+    const kanaGridWrap = document.getElementById("kanaGridWrap");
     const kanaResetBtn = document.getElementById("kanaResetBtn");
 
     const esc = (v) => String(v ?? "")
@@ -1589,6 +1654,11 @@
       `;
     }
 
+    function renderKanaSection() {
+      kanaGridWrap.classList.toggle("collapsed", !S.kanaOpen);
+      kanaToggleBtn.textContent = S.kanaOpen ? "收起五十音" : "展开五十音";
+    }
+
     function renderKanaGrid() {
       kanaGrid.innerHTML = "";
       KANA.forEach((kana) => {
@@ -1603,6 +1673,7 @@
         });
         kanaGrid.appendChild(btn);
       });
+      renderKanaSection();
     }
 
     async function fetchDictionaryPayload() {
@@ -1888,6 +1959,11 @@
       S.kana = "";
       renderKanaGrid();
       applyFilter();
+    });
+
+    kanaToggleBtn.addEventListener("click", () => {
+      S.kanaOpen = !S.kanaOpen;
+      renderKanaSection();
     });
 
     renderSearchFilters();

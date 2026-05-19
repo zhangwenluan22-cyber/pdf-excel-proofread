@@ -538,12 +538,35 @@
       font-size: 13px;
       margin-top: 8px;
     }
+    .detail-hero {
+      display: grid;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .detail-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: flex-start;
+      gap: 14px 18px;
+      flex-wrap: wrap;
+    }
     .detail-title {
       font-size: clamp(24px, 3.2vw, 38px);
       letter-spacing: -0.03em;
       color: #37414c;
-      margin-top: 8px;
+      margin: 0;
       font-weight: 800;
+      flex: 0 1 auto;
+      min-width: 0;
+    }
+    .detail-meaning-inline {
+      flex: 0 1 auto;
+      min-width: min(420px, 100%);
+      color: #6f7985;
+      font-size: 16px;
+      line-height: 1.55;
+      white-space: normal;
+      word-break: break-word;
     }
     .detail-grid {
       display: grid;
@@ -770,6 +793,13 @@
       .tree-entry-meaning {
         text-align: left;
         white-space: normal;
+      }
+      .detail-heading {
+        gap: 8px;
+      }
+      .detail-meaning-inline {
+        font-size: 15px;
+        min-width: 0;
       }
       .result-snippet {
         display: inline-grid;
@@ -1792,9 +1822,13 @@
       const c = row.cells || {};
       detailEl.innerHTML = `
         <div class="detail-path">${esc(titleOf(row))} ｜ Excel 行 ${esc(row.row_number)}</div>
-        <h2 class="detail-title">${highlightText(mainLabel(row))}</h2>
+        <div class="detail-hero">
+          <div class="detail-heading">
+            <h2 class="detail-title">${highlightText(mainLabel(row))}</h2>
+            ${c["条目释义"] ? `<div class="detail-meaning-inline">${highlightText(c["条目释义"])}</div>` : ""}
+          </div>
+        </div>
         <div class="detail-grid">
-          ${sec("释义", c["条目释义"], "compact")}
           ${sec("句型功能", c["条目句型功能"], "compact")}
           ${renderContinuationSection(c["条目接续"])}
           ${sec("详解", c["条目解释"])}

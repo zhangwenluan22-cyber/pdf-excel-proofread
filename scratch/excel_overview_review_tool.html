@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Excel 总表例句审阅工具</title>
+  <style>
+    :root {
+      --bg: #f5f1e8;
+      --panel: #fffdf8;
+      --line: #ddd3c3;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #0f766e;
+      --warn: #b45309;
+      --danger: #b91c1c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(180deg, #f8f3eb 0%, #f0e6d9 100%);
+      color: var(--text);
+    }
+    .shell {
+      width: min(1560px, calc(100vw - 32px));
+      margin: 18px auto 32px;
+      display: grid;
+      gap: 18px;
+    }
+    .panel {
+      background: rgba(255, 252, 247, 0.95);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 16px 36px rgba(80, 58, 32, 0.08);
+    }
+    .hero {
+      display: grid;
+      gap: 14px;
+    }
+    h1, h2, h3 { margin: 0; }
+    .muted { color: var(--muted); line-height: 1.6; }
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 12px;
+    }
+    .box {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      background: var(--panel);
+      display: grid;
+      gap: 10px;
+    }
+    .stat-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    input[type="file"], textarea {
+      width: 100%;
+      font: inherit;
+    }
+    input[type="file"] {
+      display: none;
+    }
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 11px 14px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      background: #ede2d1;
+      color: #6b4f2d;
+    }
+    button.primary {
+      background: var(--accent);
+      color: white;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .top-detail-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      background: var(--panel);
+    }
+    .stat .num {
+      font-size: 28px;
+      font-weight: 800;
+      margin-top: 6px;
+    }
+    .content {
+      display: block;
+    }
+    .warning-list, .entry-list {
+      display: grid;
+      gap: 10px;
+      max-height: 34vh;
+      overflow: auto;
+      padding-right: 4px;
+    }
+    .entry-list {
+      max-height: none;
+    }
+    .warning-item, .entry-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      background: var(--panel);
+    }
+    .warning-item.warning { border-left: 4px solid var(--warn); }
+    .warning-item.error { border-left: 4px solid var(--danger); }
+    .warning-item.jumpable {
+      cursor: pointer;
+      transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+    }
+    .warning-item.jumpable:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 20px rgba(80, 58, 32, 0.08);
+      border-color: #ceb898;
+    }
+    .entry-card.target-flash {
+      border-color: #c26b13;
+      box-shadow: 0 0 0 4px rgba(194, 107, 19, 0.14);
+    }
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .entry-topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .entry-meta-row {
+      flex: 1 1 auto;
+      margin-bottom: 0;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #eef7f6;
+      color: var(--accent);
+    }
+    .block {
+      border: 1px solid #efe5d7;
+      border-radius: 12px;
+      background: #fff;
+      padding: 12px;
+      white-space: pre-wrap;
+      line-height: 1.65;
+      word-break: break-word;
+    }
+    .raw-block-details {
+      display: grid;
+      gap: 10px;
+      margin: 0 0 0 auto;
+      flex: 0 0 auto;
+    }
+    .raw-toggle {
+      list-style: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: fit-content;
+      min-width: 148px;
+      padding: 9px 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff8ef;
+      color: #6b4f2d;
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+    }
+    .raw-toggle::-webkit-details-marker {
+      display: none;
+    }
+    .raw-toggle::before {
+      content: "展开原文本";
+    }
+    .raw-block-details[open] .raw-toggle::before {
+      content: "收起原文本";
+    }
+    .raw-block-details[open] {
+      flex-basis: 100%;
+      margin-left: 0;
+    }
+    .example {
+      border-top: 1px solid #efe5d7;
+      padding-top: 10px;
+      margin-top: 10px;
+      display: grid;
+      gap: 6px;
+    }
+    .jp { font-family: "Noto Serif SC", "Songti SC", serif; }
+    .json-box {
+      width: 100%;
+      min-height: 62vh;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: #fbfaf6;
+      font-family: "SF Mono", Menlo, Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.55;
+      resize: vertical;
+    }
+    .toolbar-actions {
+      display: grid;
+      gap: 10px;
+    }
+    .ghost-button {
+      border: 1px solid var(--line);
+      background: #fff8ef;
+      color: #6b4f2d;
+    }
+    .modal[hidden] {
+      display: none;
+    }
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: rgba(31, 41, 55, 0.34);
+      backdrop-filter: blur(3px);
+    }
+    .modal-panel {
+      width: min(1040px, calc(100vw - 40px));
+      max-height: calc(100vh - 48px);
+      overflow: auto;
+      background: rgba(255, 252, 247, 0.98);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 18px;
+      box-shadow: 0 20px 48px rgba(31, 41, 55, 0.22);
+      display: grid;
+      gap: 14px;
+    }
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    @media (max-width: 1100px) {
+      .toolbar, .stats, .top-detail-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="panel hero">
+      <div>
+        <h1>语法 Excel 审核工具</h1>
+      </div>
+      <div class="toolbar">
+        <div class="box">
+          <input id="fileInput" type="file" accept=".xlsx,.xlsm" />
+          <button id="uploadBtn" class="primary">选择 Excel 并解析</button>
+        </div>
+        <div class="box">
+          <div class="toolbar-actions">
+            <button id="openJsonModalBtn" class="ghost-button" disabled>查看 JSON 预览</button>
+            <button id="downloadJsonBtn" disabled>下载 JSON</button>
+          </div>
+          <div class="muted">网页负责读 Excel 和看异常；最终 JSON 来自同一套解析规则。</div>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="stat-label">条目</div><div id="statEntries" class="num">0</div></div>
+        <div class="stat"><div class="stat-label">例句</div><div id="statExamples" class="num">0</div></div>
+        <div class="stat"><div class="stat-label">异常</div><div id="statWarnings" class="num">0</div></div>
+        <div class="stat"><div class="stat-label">有例句条目</div><div id="statFallback" class="num">0</div></div>
+      </div>
+      <div class="top-detail-grid">
+        <section class="box">
+          <h2>异常明细</h2>
+          <div class="muted">如果例句块有问题，会尽量定位到 Excel 第几行，以及单元格内部从第几行开始异常。点击异常可跳到对应条目。</div>
+          <div id="warningList" class="warning-list"></div>
+        </section>
+      </div>
+    </section>
+
+    <section class="content">
+      <section class="panel">
+        <h2>条目预览</h2>
+        <div class="muted" style="margin: 8px 0 14px;">保留主表原始例句块，同时展示解析后的例句数组，方便直接核对。</div>
+        <div id="entryList" class="entry-list"></div>
+      </section>
+    </section>
+  </div>
+
+  <div id="jsonModal" class="modal" hidden>
+    <div class="modal-panel">
+      <div class="modal-head">
+        <div>
+          <h2>JSON 预览</h2>
+          <div class="muted">默认折叠；需要时再展开查看整体结构。</div>
+        </div>
+        <button id="closeJsonModalBtn" class="ghost-button">关闭</button>
+      </div>
+      <textarea id="jsonPreview" class="json-box" readonly></textarea>
+    </div>
+  </div>
+
+  <script>
+    const DEBUG_TAG = "[excel-review]";
+    const TOOL_VERSION = "2026-04-17-layout-refresh-3";
+
+    const STATE = {
+      data: null,
+      currentFileName: ""
+    };
+
+    const fileInput = document.getElementById("fileInput");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const downloadJsonBtn = document.getElementById("downloadJsonBtn");
+    const openJsonModalBtn = document.getElementById("openJsonModalBtn");
+    const closeJsonModalBtn = document.getElementById("closeJsonModalBtn");
+    const jsonModal = document.getElementById("jsonModal");
+    const warningList = document.getElementById("warningList");
+    const entryList = document.getElementById("entryList");
+    const jsonPreview = document.getElementById("jsonPreview");
+    const statusText = document.getElementById("statusText");
+
+    function debugLog(event, payload = {}) {
+      console.log(DEBUG_TAG, event, {
+        version: TOOL_VERSION,
+        time: new Date().toISOString(),
+        ...payload
+      });
+    }
+
+    function setStatus(message) {
+      if (statusText) {
+        statusText.textContent = message;
+      }
+      debugLog("status-update", { message });
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function updateStats() {
+      const data = STATE.data;
+      const entryCount = data ? data.entries.length : 0;
+      const exampleCount = data ? data.entries.reduce((sum, entry) => sum + entry.examples.length, 0) : 0;
+      const warningCount = collectVisibleWarnings().length;
+      const entryWithExampleCount = data ? data.entries.filter((entry) => entry.examples.length > 0).length : 0;
+      document.getElementById("statEntries").textContent = entryCount;
+      document.getElementById("statExamples").textContent = exampleCount;
+      document.getElementById("statWarnings").textContent = warningCount;
+      document.getElementById("statFallback").textContent = entryWithExampleCount;
+      debugLog("update-stats", {
+        hasData: Boolean(data),
+        entryCount,
+        exampleCount,
+        warningCount,
+        entryWithExampleCount
+      });
+    }
+
+    function collectVisibleWarnings() {
+      if (!STATE.data) {
+        return [];
+      }
+
+      const globalWarnings = (STATE.data.warnings || []).map((item) => ({
+        ...item,
+        source_type: "global",
+        entry_id: item.scope && item.scope !== "overview_sheet" ? item.scope : null
+      }));
+      const entryWarnings = (STATE.data.entries || []).flatMap((entry) =>
+        (entry.validation?.warnings || []).map((item) => ({
+          ...item,
+          source_type: "entry",
+          entry_id: entry.entry_id,
+          entry_title: entry.sub_entry || entry.middle_entry || entry.headword || entry.entry_id
+        }))
+      );
+
+      return [...globalWarnings, ...entryWarnings].sort((a, b) => {
+        const rowA = Number.isFinite(a.row_number) ? a.row_number : Number.MAX_SAFE_INTEGER;
+        const rowB = Number.isFinite(b.row_number) ? b.row_number : Number.MAX_SAFE_INTEGER;
+        if (rowA !== rowB) {
+          return rowA - rowB;
+        }
+        const lineA = Number.isFinite(a.line_number) ? a.line_number : Number.MAX_SAFE_INTEGER;
+        const lineB = Number.isFinite(b.line_number) ? b.line_number : Number.MAX_SAFE_INTEGER;
+        if (lineA !== lineB) {
+          return lineA - lineB;
+        }
+        return String(a.entry_id || "").localeCompare(String(b.entry_id || ""));
+      });
+    }
+
+    function buildEntryDomId(entry) {
+      return `entry-card-${entry.entry_id || entry.row_number}`;
+    }
+
+    function scrollToEntryWarning(item) {
+      const rowNumber = item.row_number || null;
+      const targetEntry = (STATE.data?.entries || []).find((entry) => {
+        if (item.entry_id && entry.entry_id === item.entry_id) {
+          return true;
+        }
+        return rowNumber && entry.row_number === rowNumber;
+      });
+      if (!targetEntry) {
+        debugLog("warning-jump-miss", {
+          entry_id: item.entry_id || null,
+          row_number: rowNumber,
+          line_number: item.line_number || null
+        });
+        return;
+      }
+
+      const target = document.getElementById(buildEntryDomId(targetEntry));
+      if (!target) {
+        debugLog("warning-jump-dom-miss", {
+          entry_id: targetEntry.entry_id,
+          row_number: targetEntry.row_number
+        });
+        return;
+      }
+
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      target.classList.add("target-flash");
+      window.setTimeout(() => target.classList.remove("target-flash"), 1800);
+      debugLog("warning-jump", {
+        from_entry_id: item.entry_id || null,
+        to_entry_id: targetEntry.entry_id,
+        row_number: targetEntry.row_number
+      });
+    }
+
+    function renderWarnings() {
+      const warnings = collectVisibleWarnings();
+      warningList.innerHTML = "";
+      if (!warnings.length) {
+        warningList.innerHTML = `<div class="warning-item"><div class="muted">当前没有异常。</div></div>`;
+        debugLog("render-warnings", {
+          hasData: Boolean(STATE.data),
+          warningCount: 0
+        });
+        return;
+      }
+      debugLog("render-warnings", {
+        hasData: Boolean(STATE.data),
+        warningCount: warnings.length,
+        sample: warnings.slice(0, 3).map((item) => ({
+          level: item.level,
+          scope: item.scope,
+          row_number: item.row_number,
+          line_number: item.line_number,
+          message: item.message,
+          entry_id: item.entry_id || null
+        }))
+      });
+      warnings.forEach((item) => {
+        const rowText = item.row_number ? `Excel 第 ${item.row_number} 行` : "未定位到行";
+        const lineText = item.line_number ? `块内第 ${item.line_number} 行` : "";
+        const entryText = item.entry_id ? `条目 ${item.entry_id}` : "";
+        const extra = [entryText, rowText, lineText].filter(Boolean).join(" / ");
+        const div = document.createElement("div");
+        const isJumpable = Boolean(item.entry_id || item.row_number);
+        div.className = `warning-item ${item.level === "error" ? "error" : "warning"}${isJumpable ? " jumpable" : ""}`;
+        if (isJumpable) {
+          div.title = "点击定位到右侧条目";
+          div.addEventListener("click", () => scrollToEntryWarning(item));
+        }
+        div.innerHTML = `
+          <div class="pill-row">
+            <span class="pill">${escapeHtml(item.level)}</span>
+            <span class="pill">${escapeHtml(item.scope)}</span>
+            <span class="pill">${escapeHtml(extra)}</span>
+          </div>
+          <div>${escapeHtml(item.message)}</div>
+        `;
+        warningList.appendChild(div);
+      });
+    }
+
+    function renderEntries() {
+      const data = STATE.data;
+      entryList.innerHTML = "";
+      if (!data) {
+        entryList.innerHTML = `<div class="entry-card"><div class="muted">上传 Excel 后显示内容。</div></div>`;
+        debugLog("render-entries", { hasData: false, entryCount: 0 });
+        return;
+      }
+      const entries = data.entries;
+      if (!entries.length) {
+        entryList.innerHTML = `<div class="entry-card"><div class="muted">当前没有条目。</div></div>`;
+        debugLog("render-entries", {
+          hasData: true,
+          entryCount: 0,
+          totalCount: data.entries.length
+        });
+        return;
+      }
+      debugLog("render-entries", {
+        hasData: true,
+        entryCount: entries.length,
+        totalCount: data.entries.length,
+        sampleEntryIds: entries.slice(0, 5).map((entry) => entry.entry_id)
+      });
+      entries.forEach((entry) => {
+        const examplesHtml = entry.examples.map((example) => `
+          <div class="example">
+            <div class="pill-row">
+              <span class="pill">例句 ${escapeHtml(example.example_order ?? "-")}</span>
+              ${example.source_line_number ? `<span class="pill">块内起始行 ${escapeHtml(example.source_line_number)}</span>` : ""}
+            </div>
+            <div class="jp">${escapeHtml(example.japanese || "")}</div>
+            <div>${escapeHtml(example.chinese || "缺少中文翻译")}</div>
+          </div>
+        `).join("");
+        const hasNoExampleWarning = (entry.validation?.warnings || []).some(
+          (item) => item.message === "当前条目没有例句。"
+        );
+        const inlineWarnings = (entry.validation?.warnings || []).filter(
+          (item) => item.message !== "当前条目没有例句。"
+        );
+        const validationHtml = inlineWarnings.map((item) => `
+          <div class="warning-item ${item.level === "error" ? "error" : "warning"}" style="margin-top: 8px;">
+            <div class="pill-row">
+              <span class="pill">${escapeHtml(item.level)}</span>
+              ${item.row_number ? `<span class="pill">Excel 第 ${escapeHtml(item.row_number)} 行</span>` : ""}
+              ${item.line_number ? `<span class="pill">块内第 ${escapeHtml(item.line_number)} 行</span>` : ""}
+            </div>
+            <div>${escapeHtml(item.message)}</div>
+          </div>
+        `).join("");
+        const rawBlockHtml = entry.example_block_raw
+          ? `
+            <details class="raw-block-details">
+              <summary class="raw-toggle"></summary>
+              <div class="block">${escapeHtml(entry.example_block_raw)}</div>
+            </details>
+          `
+          : `<div class="block" style="margin-top: 10px;">主表里没有例句块</div>`;
+        const div = document.createElement("div");
+        div.className = "entry-card";
+        div.id = buildEntryDomId(entry);
+        div.innerHTML = `
+          <div class="entry-topbar">
+            <div class="pill-row entry-meta-row">
+              <span class="pill">${escapeHtml(entry.entry_id)}</span>
+              <span class="pill">Excel 第 ${escapeHtml(entry.row_number)}</span>
+              <span class="pill">${escapeHtml(entry.example_source)}</span>
+            </div>
+            ${entry.example_block_raw ? rawBlockHtml : ""}
+          </div>
+          <h3>${escapeHtml(entry.sub_entry || entry.middle_entry || entry.headword || entry.entry_id)}</h3>
+          <div class="muted">${escapeHtml(entry.meaning || "未填写释义")}</div>
+          ${!entry.example_block_raw ? rawBlockHtml : ""}
+          ${validationHtml}
+          ${examplesHtml ? `<div style="margin-top: 10px;">${examplesHtml}</div>` : ""}
+          ${!examplesHtml && !hasNoExampleWarning ? `<div class="muted" style="margin-top: 10px;">没有解析出例句。</div>` : ""}
+        `;
+        entryList.appendChild(div);
+      });
+    }
+
+    function renderJsonPreview() {
+      jsonPreview.value = STATE.data ? JSON.stringify(STATE.data, null, 2) : "";
+      debugLog("render-json-preview", {
+        hasData: Boolean(STATE.data),
+        jsonLength: jsonPreview.value.length
+      });
+    }
+
+    function renderAll() {
+      debugLog("render-all:start", {
+        hasData: Boolean(STATE.data)
+      });
+      updateStats();
+      renderWarnings();
+      renderEntries();
+      renderJsonPreview();
+      downloadJsonBtn.disabled = !STATE.data;
+      openJsonModalBtn.disabled = !STATE.data;
+      debugLog("render-all:done", {
+        hasData: Boolean(STATE.data),
+        downloadEnabled: !downloadJsonBtn.disabled,
+        jsonPreviewEnabled: !openJsonModalBtn.disabled
+      });
+    }
+
+    async function parseCurrentFile() {
+      const file = fileInput.files?.[0];
+      if (!file) {
+        setStatus("先选择一个 Excel 文件。");
+        debugLog("parse-aborted:no-file");
+        return;
+      }
+      setStatus("正在解析…");
+      uploadBtn.disabled = true;
+      uploadBtn.textContent = "正在解析…";
+      debugLog("parse-start", {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type || "unknown"
+      });
+      const form = new FormData();
+      form.append("file", file, file.name);
+      try {
+        const response = await fetch("/api/parse-excel", { method: "POST", body: form });
+        const payload = await response.json();
+        debugLog("parse-response", {
+          status: response.status,
+          ok: response.ok,
+          payloadOk: payload.ok,
+          sheetSummary: payload.data?.sheet_summary || null,
+          entryCount: payload.data?.entries?.length ?? 0,
+          warningCount: payload.data?.warnings?.length ?? 0,
+          sampleEntryIds: (payload.data?.entries || []).slice(0, 5).map((entry) => entry.entry_id)
+        });
+        if (!response.ok || !payload.ok) {
+          throw new Error(payload.error || "解析失败");
+        }
+        STATE.data = payload.data;
+        STATE.currentFileName = file.name;
+        setStatus(`解析完成：${file.name}`);
+        renderAll();
+      } catch (error) {
+        STATE.data = null;
+        renderAll();
+        setStatus(`解析失败：${error.message}`);
+        debugLog("parse-error", {
+          fileName: file.name,
+          message: error.message
+        });
+      } finally {
+        uploadBtn.disabled = false;
+        uploadBtn.textContent = "重新选择 Excel 并解析";
+        debugLog("parse-finished", {
+          fileName: file.name,
+          hasData: Boolean(STATE.data)
+        });
+      }
+    }
+
+    uploadBtn.addEventListener("click", () => {
+      if (uploadBtn.disabled) {
+        return;
+      }
+      debugLog("open-file-picker", {
+        currentFileName: STATE.currentFileName || null
+      });
+      fileInput.click();
+    });
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files?.[0];
+      if (!file) {
+        debugLog("file-picker-cancelled");
+        return;
+      }
+      setStatus(`已选择：${file.name}，正在开始解析…`);
+      debugLog("file-selected", {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type || "unknown"
+      });
+      parseCurrentFile();
+    });
+    openJsonModalBtn.addEventListener("click", () => {
+      if (!STATE.data) return;
+      jsonModal.hidden = false;
+      debugLog("json-modal-open", {
+        fileName: STATE.currentFileName,
+        jsonLength: jsonPreview.value.length
+      });
+    });
+    closeJsonModalBtn.addEventListener("click", () => {
+      jsonModal.hidden = true;
+      debugLog("json-modal-close");
+    });
+    jsonModal.addEventListener("click", (event) => {
+      if (event.target === jsonModal) {
+        jsonModal.hidden = true;
+        debugLog("json-modal-close:backdrop");
+      }
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !jsonModal.hidden) {
+        jsonModal.hidden = true;
+        debugLog("json-modal-close:escape");
+      }
+    });
+    downloadJsonBtn.addEventListener("click", () => {
+      if (!STATE.data) return;
+      debugLog("download-json", {
+        fileName: STATE.currentFileName,
+        entryCount: STATE.data.entries.length,
+        warningCount: collectVisibleWarnings().length
+      });
+      const blob = new Blob([JSON.stringify(STATE.data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = (STATE.currentFileName || "excel_review").replace(/\.xlsx$/i, "") + ".json";
+      anchor.click();
+      URL.revokeObjectURL(url);
+    });
+
+    debugLog("page-load", {
+      title: document.title,
+      mode: "overview_only"
+    });
+    renderAll();
+  </script>
+</body>
+</html>

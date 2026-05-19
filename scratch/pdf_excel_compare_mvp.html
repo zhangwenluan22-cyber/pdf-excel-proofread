@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF × Excel 跨格式校对台（MVP）</title>
+  <style>
+    :root {
+      --bg-1: #f8f2e8;
+      --bg-2: #eadcc8;
+      --panel: #fffaf2;
+      --line: #d7c4ab;
+      --text: #1f2937;
+      --muted: #5d6472;
+      --accent: #0f766e;
+      --accent-soft: #e3f4f1;
+      --warn: #b45309;
+      --danger: #b91c1c;
+      --ok: #166534;
+      --shadow: 0 14px 34px rgba(64, 42, 18, 0.12);
+      --radius-xl: 20px;
+      --radius-lg: 14px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: radial-gradient(circle at 8% 0%, #fff6eb 0%, transparent 28%),
+        linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+    }
+    .shell {
+      width: min(1700px, calc(100vw - 28px));
+      margin: 14px auto 24px;
+      display: grid;
+      gap: 14px;
+    }
+    .panel {
+      background: rgba(255, 250, 242, 0.96);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+    h1, h2, h3 { margin: 0; }
+    .top {
+      display: grid;
+      gap: 12px;
+    }
+    .toolbar {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 10px;
+    }
+    .box {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 12px;
+      background: var(--panel);
+      display: grid;
+      gap: 10px;
+    }
+    .muted { color: var(--muted); }
+    .control-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    input[type="file"] { display: none; }
+    button, .btn-like {
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 9px 12px;
+      background: #efe2ce;
+      color: #674c2c;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    a.btn-like {
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+    }
+    button.primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    button.ghost {
+      border-color: var(--line);
+      background: #fff7ec;
+    }
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      background: #fff;
+    }
+    .stat small {
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+    .stat strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 26px;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: 320px minmax(420px, 1fr) minmax(360px, 0.9fr);
+      gap: 10px;
+      min-height: 64vh;
+    }
+    .col {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: var(--panel);
+      padding: 10px;
+      display: grid;
+      gap: 10px;
+      min-height: 0;
+    }
+    .scroll {
+      overflow: auto;
+      min-height: 0;
+      padding-right: 4px;
+    }
+    .issue-item, .excel-card, .pdf-card {
+      border: 1px solid #e9dcc9;
+      border-radius: 12px;
+      padding: 10px;
+      background: #fff;
+    }
+    .issue-item {
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .issue-item:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 14px rgba(64, 42, 18, 0.1);
+    }
+    .issue-item.active {
+      border-color: #c8791e;
+      box-shadow: 0 0 0 3px rgba(200, 121, 30, 0.14);
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      font-size: 12px;
+      border-radius: 999px;
+      padding: 3px 8px;
+      background: #edf7f6;
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .pill.warn { background: #fff0df; color: var(--warn); }
+    .pill.err { background: #fde8e8; color: var(--danger); }
+    .excel-card.active, .pdf-card.active {
+      border-color: #c8791e;
+      box-shadow: 0 0 0 3px rgba(200, 121, 30, 0.14);
+    }
+    .entry-title { font-size: 17px; margin-top: 6px; }
+    .line-pair {
+      border-top: 1px dashed #efdfc9;
+      margin-top: 8px;
+      padding-top: 8px;
+      display: grid;
+      gap: 4px;
+      line-height: 1.6;
+    }
+    .diff {
+      border-left: 4px solid var(--danger);
+      padding-left: 8px;
+      background: #fff8f8;
+    }
+    .pdf-quote {
+      line-height: 1.7;
+      white-space: pre-wrap;
+      background: #fffdf9;
+      border: 1px solid #f0e2cf;
+      border-radius: 10px;
+      padding: 8px;
+      margin-top: 8px;
+    }
+    .pdf-preview-panel {
+      border: 1px solid #e3d3bd;
+      border-radius: 12px;
+      background: #fff;
+      padding: 8px;
+      display: grid;
+      gap: 8px;
+    }
+    .pdf-preview-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .page-input {
+      width: 88px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 5px 8px;
+      font: inherit;
+      background: #fffdf9;
+    }
+    .mini-input {
+      width: 74px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 5px 8px;
+      font: inherit;
+      background: #fffdf9;
+    }
+    .progress-text {
+      font-size: 13px;
+      color: #3a4a5e;
+      font-weight: 700;
+    }
+    .pdf-frame-wrap {
+      border: 1px solid #eadcc8;
+      border-radius: 10px;
+      background: #fffdf9;
+      min-height: 340px;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+    }
+    .pdf-frame {
+      width: 100%;
+      height: 420px;
+      border: 0;
+      background: #fff;
+    }
+    .status {
+      color: #264653;
+      background: #e8f1f1;
+      border: 1px solid #c4dddd;
+      border-radius: 10px;
+      padding: 7px 10px;
+      font-size: 13px;
+    }
+    .figma-note {
+      border-top: 1px dashed #e5d3bb;
+      padding-top: 10px;
+      color: #66553e;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    @media (max-width: 1220px) {
+      .toolbar, .stats, .board {
+        grid-template-columns: 1fr;
+      }
+      .board { min-height: auto; }
+      .scroll { max-height: 48vh; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="panel top">
+      <div>
+        <h1>PDF × Excel 跨格式校对台</h1>
+        <div class="muted">先结构化对齐，再看差异。减少放大缩小和左右拖动。</div>
+      </div>
+      <div class="toolbar">
+        <div class="box">
+          <div class="control-row">
+            <input id="excelInput" type="file" accept=".xlsx,.xls,.csv" />
+            <button id="excelBtn">上传 Excel</button>
+            <span id="excelName" class="muted">未选择</span>
+          </div>
+          <div class="control-row">
+            <input id="pdfInput" type="file" accept=".pdf" />
+            <button id="pdfBtn">上传 PDF</button>
+            <span id="pdfName" class="muted">未选择</span>
+          </div>
+          <div class="control-row">
+            <button id="runBtn" class="primary" disabled>开始比对（MVP模拟）</button>
+            <button id="exportBtn" class="ghost" disabled>导出差异 JSON</button>
+          </div>
+        </div>
+        <div class="box">
+          <div class="control-row">
+            <label class="btn-like">
+              <input id="onlyIssue" type="checkbox" />
+              仅看异常
+            </label>
+            <label class="btn-like">
+              <input id="excelReadMode" type="checkbox" checked />
+              Excel 清晰阅读模式
+            </label>
+          </div>
+          <div class="control-row">
+            <span class="muted">校对范围:</span>
+            <input id="rangeStartInput" class="mini-input" type="number" min="1" placeholder="起始" />
+            <span class="muted">到</span>
+            <input id="rangeEndInput" class="mini-input" type="number" min="1" placeholder="结束" />
+            <button id="applyRangeBtn" class="ghost" type="button">应用范围</button>
+            <button id="resetRangeBtn" class="ghost" type="button">全量</button>
+          </div>
+          <div class="control-row">
+            <button id="startFromFirstBtn" class="ghost" type="button">从第一条开始</button>
+            <button id="prevBtn" class="ghost" type="button">上一条</button>
+            <button id="nextBtn" class="ghost" type="button">下一条</button>
+            <span id="reviewProgress" class="progress-text">当前: - / -</span>
+          </div>
+          <div class="status" id="statusText">等待上传 Excel 与 PDF。</div>
+          <div class="figma-note">
+            Figma 协作建议: 三栏布局组件化（异常项/Excel条目卡/PDF证据卡），再把色板、圆角、间距抽成 token。
+          </div>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><small>条目总数</small><strong id="statEntries">0</strong></div>
+        <div class="stat"><small>命中条目</small><strong id="statMatched">0</strong></div>
+        <div class="stat"><small>异常条目</small><strong id="statIssues">0</strong></div>
+        <div class="stat"><small>疑似错位</small><strong id="statShift">0</strong></div>
+      </div>
+    </section>
+
+    <section class="board">
+      <section class="col">
+        <h2>校对列表</h2>
+        <div class="muted">默认从第一条顺序校对，也可切换仅看异常或指定范围。</div>
+        <div id="issueList" class="scroll"></div>
+      </section>
+      <section class="col">
+        <h2>Excel 清晰阅读区</h2>
+        <div class="muted">逐条例句卡片展示，优先可读性。</div>
+        <div id="excelView" class="scroll"></div>
+      </section>
+      <section class="col">
+        <h2>PDF 预览区</h2>
+        <div class="muted">右侧仅保留 PDF 预览，校对时直接看原页内容。</div>
+        <div class="pdf-preview-panel">
+          <div class="pdf-preview-toolbar">
+            <span class="pill">预览页码 <span id="previewPageNum">-</span></span>
+            <button id="jumpToSelectedBtn" class="ghost" type="button">跳到当前条目页</button>
+            <input id="pdfPageInput" class="page-input" type="number" min="1" placeholder="页码" />
+            <button id="goPageBtn" class="ghost" type="button">跳转</button>
+            <a id="openPdfBtn" class="btn-like ghost" href="#" target="_blank" rel="noopener noreferrer">新窗口打开PDF</a>
+          </div>
+          <div class="pdf-frame-wrap">
+            <iframe id="pdfFrame" class="pdf-frame" title="PDF 预览"></iframe>
+            <div id="pdfEmptyHint" class="muted">上传 PDF 后可在这里预览。若空白请点“新窗口打开PDF”。</div>
+          </div>
+        </div>
+      </section>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script>
+    const STATE = {
+      excelFile: null,
+      pdfFile: null,
+      pdfObjectUrl: null,
+      rows: [],
+      selectedId: null,
+      currentPdfPage: null,
+      rangeStart: null,
+      rangeEnd: null
+    };
+
+    const MOCK_COMPARE_RESULT = [
+      {
+        entry_id: "G-2-01",
+        title: "～てしまう",
+        meaning: "表示完成、遗憾或不可逆结果。",
+        excel_examples: [
+          { jp: "財布をなくしてしまった。", zh: "把钱包弄丢了。" },
+          { jp: "宿題を忘れてしまいました。", zh: "把作业给忘了。" }
+        ],
+        pdf_hits: [{ page: 36, quote: "財布をなくしてしまった。/ 把钱包弄丢了。", score: 0.96 }],
+        issues: []
+      },
+      {
+        entry_id: "G-2-02",
+        title: "～ようにする",
+        meaning: "表示有意识地保持某习惯。",
+        excel_examples: [
+          { jp: "毎日運動するようにしている。", zh: "我尽量每天运动。" },
+          { jp: "早く寝るようにする。", zh: "我会尽量早点睡。" }
+        ],
+        pdf_hits: [{ page: 38, quote: "毎日運動するようにしている。", score: 0.84 }],
+        issues: [
+          { level: "warning", type: "缺失翻译", message: "PDF命中仅找到日文，中文译文未匹配到。" }
+        ]
+      },
+      {
+        entry_id: "G-2-03",
+        title: "～ことになる",
+        meaning: "表示决定、结果、安排。",
+        excel_examples: [
+          { jp: "来月、出張することになった。", zh: "下个月决定要出差。" }
+        ],
+        pdf_hits: [{ page: 41, quote: "来月、出張することになる。", score: 0.79 }],
+        issues: [
+          { level: "error", type: "文本差异", message: "PDF 中是「ことになる」，Excel 是「ことになった」。疑似时态不一致。" },
+          { level: "warning", type: "疑似错位", message: "下一条句子与本条语义相近，建议检查上下文是否串行。" }
+        ]
+      }
+    ];
+
+    const excelInput = document.getElementById("excelInput");
+    const pdfInput = document.getElementById("pdfInput");
+    const excelBtn = document.getElementById("excelBtn");
+    const pdfBtn = document.getElementById("pdfBtn");
+    const runBtn = document.getElementById("runBtn");
+    const exportBtn = document.getElementById("exportBtn");
+    const excelName = document.getElementById("excelName");
+    const pdfName = document.getElementById("pdfName");
+    const statusText = document.getElementById("statusText");
+    const issueList = document.getElementById("issueList");
+    const excelView = document.getElementById("excelView");
+    const onlyIssue = document.getElementById("onlyIssue");
+    const excelReadMode = document.getElementById("excelReadMode");
+    const pdfFrame = document.getElementById("pdfFrame");
+    const pdfEmptyHint = document.getElementById("pdfEmptyHint");
+    const previewPageNum = document.getElementById("previewPageNum");
+    const pdfPageInput = document.getElementById("pdfPageInput");
+    const goPageBtn = document.getElementById("goPageBtn");
+    const jumpToSelectedBtn = document.getElementById("jumpToSelectedBtn");
+    const openPdfBtn = document.getElementById("openPdfBtn");
+    const rangeStartInput = document.getElementById("rangeStartInput");
+    const rangeEndInput = document.getElementById("rangeEndInput");
+    const applyRangeBtn = document.getElementById("applyRangeBtn");
+    const resetRangeBtn = document.getElementById("resetRangeBtn");
+    const startFromFirstBtn = document.getElementById("startFromFirstBtn");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const reviewProgress = document.getElementById("reviewProgress");
+
+    function setStatus(msg) {
+      statusText.textContent = msg;
+    }
+
+    function esc(v) {
+      return String(v ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function updateStats() {
+      const rows = STATE.rows;
+      const issueRows = rows.filter((r) => r.issues.length > 0);
+      const shiftCount = rows.filter((r) => r.issues.some((x) => x.type === "疑似错位")).length;
+      document.getElementById("statEntries").textContent = rows.length;
+      document.getElementById("statMatched").textContent = rows.filter((r) => r.pdf_hits.length > 0).length;
+      document.getElementById("statIssues").textContent = issueRows.length;
+      document.getElementById("statShift").textContent = shiftCount;
+    }
+
+    function buildEntryIdFromRow(row, index) {
+      const direct = String(row["条目ID"] || "").trim();
+      if (direct) return direct;
+      const head = String(row["大条目"] || "").trim();
+      const mid = String(row["中条目序号"] || "").trim();
+      const sub = String(row["小条目序号"] || "").trim();
+      const parts = [head, mid, sub].filter(Boolean);
+      return parts.length ? parts.join("-") : `row-${index + 1}`;
+    }
+
+    function parseExampleBlock(block) {
+      const text = String(block || "").replaceAll("\r\n", "\n").replaceAll("\r", "\n").trim();
+      if (!text) return [];
+      const lines = text.split("\n").map((x) => x.trim()).filter(Boolean);
+      const pairs = [];
+      for (let i = 0; i < lines.length; i += 2) {
+        pairs.push({
+          jp: lines[i] || "",
+          zh: lines[i + 1] || ""
+        });
+      }
+      return pairs;
+    }
+
+    async function buildRowsFromExcel(file) {
+      if (!window.XLSX) {
+        throw new Error("未加载到 Excel 解析库（XLSX）。请联网后刷新页面重试。");
+      }
+      const buffer = await file.arrayBuffer();
+      const wb = window.XLSX.read(buffer, { type: "array" });
+      const targetSheetName = wb.SheetNames.includes("总览表_录入表")
+        ? "总览表_录入表"
+        : wb.SheetNames[0];
+      const ws = wb.Sheets[targetSheetName];
+      if (!ws) {
+        throw new Error("Excel 中未找到可读取的工作表。");
+      }
+      const sourceRows = window.XLSX.utils.sheet_to_json(ws, { defval: "" });
+      const rows = sourceRows
+        .filter((r) => String(r["大条目"] || r["中条目"] || r["小条目"] || r["条目ID"] || "").trim())
+        .map((r, idx) => {
+          const title =
+            String(r["小条目"] || "").trim() ||
+            String(r["中条目"] || "").trim() ||
+            String(r["大条目"] || "").trim() ||
+            `条目 ${idx + 1}`;
+          const examples = parseExampleBlock(r["例句原文块"]);
+          const hasMeaning = String(r["条目释义"] || "").trim().length > 0;
+          return {
+            entry_id: buildEntryIdFromRow(r, idx),
+            title,
+            meaning: String(r["条目释义"] || "").trim() || "未填写释义",
+            excel_examples: examples,
+            pdf_hits: [],
+            issues: [
+              ...(!hasMeaning ? [{ level: "warning", type: "缺少释义", message: "Excel 当前条目缺少条目释义。" }] : []),
+              ...(examples.length === 0 ? [{ level: "warning", type: "缺少例句", message: "Excel 当前条目没有可解析的例句原文块。" }] : [])
+            ]
+          };
+        });
+      if (!rows.length) {
+        throw new Error("未解析出条目，请确认表头包含大条目/中条目/小条目等字段。");
+      }
+      return rows;
+    }
+
+    function getBaseRows() {
+      return onlyIssue.checked ? STATE.rows.filter((r) => r.issues.length > 0) : STATE.rows;
+    }
+
+    function visibleRows() {
+      const rows = getBaseRows();
+      if (!rows.length) return [];
+      const start = STATE.rangeStart ?? 1;
+      const end = STATE.rangeEnd ?? rows.length;
+      const safeStart = Math.min(Math.max(start, 1), rows.length);
+      const safeEnd = Math.min(Math.max(end, 1), rows.length);
+      if (safeEnd < safeStart) return [];
+      return rows.slice(safeStart - 1, safeEnd);
+    }
+
+    function syncRangeInputs() {
+      rangeStartInput.value = STATE.rangeStart ?? "";
+      rangeEndInput.value = STATE.rangeEnd ?? "";
+    }
+
+    function applyRangeFromInputs() {
+      const rows = getBaseRows();
+      if (!rows.length) {
+        setStatus("当前没有可设置范围的条目。");
+        return;
+      }
+      const startRaw = Number.parseInt(rangeStartInput.value, 10);
+      const endRaw = Number.parseInt(rangeEndInput.value, 10);
+      if (!Number.isFinite(startRaw) || !Number.isFinite(endRaw)) {
+        setStatus("请输入有效的起始和结束序号。");
+        return;
+      }
+      const start = Math.max(1, Math.min(startRaw, rows.length));
+      const end = Math.max(1, Math.min(endRaw, rows.length));
+      if (end < start) {
+        setStatus("结束序号不能小于起始序号。");
+        return;
+      }
+      STATE.rangeStart = start;
+      STATE.rangeEnd = end;
+      ensureSelection(true);
+      renderAll();
+      setStatus(`已应用校对范围: 第 ${start} 到第 ${end} 条。`);
+    }
+
+    function resetRange() {
+      STATE.rangeStart = null;
+      STATE.rangeEnd = null;
+      syncRangeInputs();
+      ensureSelection(true);
+      renderAll();
+    }
+
+    function getSelectedIndex(rows) {
+      return rows.findIndex((r) => r.entry_id === STATE.selectedId);
+    }
+
+    function jumpRelative(step) {
+      const rows = visibleRows();
+      if (!rows.length) return;
+      const currentIndex = getSelectedIndex(rows);
+      const nextIndex = currentIndex < 0 ? 0 : Math.min(Math.max(currentIndex + step, 0), rows.length - 1);
+      STATE.selectedId = rows[nextIndex].entry_id;
+      renderAll();
+    }
+
+    function updateProgress() {
+      const rows = visibleRows();
+      if (!rows.length) {
+        reviewProgress.textContent = "当前: - / -";
+        return;
+      }
+      const idx = getSelectedIndex(rows);
+      const show = idx >= 0 ? idx + 1 : 1;
+      reviewProgress.textContent = `当前: ${show} / ${rows.length}`;
+    }
+
+    function getSelectedRow() {
+      return visibleRows().find((row) => row.entry_id === STATE.selectedId) || null;
+    }
+
+    function detectPageForSelected() {
+      const row = getSelectedRow();
+      if (!row || !row.pdf_hits.length) return null;
+      const first = row.pdf_hits.find((hit) => Number.isFinite(hit.page) && hit.page > 0);
+      return first ? first.page : null;
+    }
+
+    function renderPdfPreview() {
+      const hasPdf = Boolean(STATE.pdfObjectUrl);
+      const selectedPage = detectPageForSelected();
+      if (selectedPage && selectedPage !== STATE.currentPdfPage) {
+        STATE.currentPdfPage = selectedPage;
+      }
+      if (!hasPdf) {
+        pdfFrame.style.display = "none";
+        pdfEmptyHint.style.display = "block";
+        previewPageNum.textContent = "-";
+        openPdfBtn.setAttribute("href", "#");
+        openPdfBtn.style.pointerEvents = "none";
+        openPdfBtn.style.opacity = "0.55";
+        return;
+      }
+      if (!STATE.currentPdfPage || STATE.currentPdfPage < 1) {
+        STATE.currentPdfPage = 1;
+      }
+      pdfFrame.style.display = "block";
+      pdfEmptyHint.style.display = "none";
+      previewPageNum.textContent = String(STATE.currentPdfPage);
+      pdfPageInput.value = String(STATE.currentPdfPage);
+      openPdfBtn.setAttribute("href", `${STATE.pdfObjectUrl}#page=${STATE.currentPdfPage}`);
+      openPdfBtn.style.pointerEvents = "auto";
+      openPdfBtn.style.opacity = "1";
+      if (pdfFrame.src !== STATE.pdfObjectUrl) {
+        pdfFrame.src = STATE.pdfObjectUrl;
+      }
+    }
+
+    function renderIssues() {
+      const rows = visibleRows();
+      issueList.innerHTML = "";
+      if (!rows.length) {
+        issueList.innerHTML = `<div class="issue-item"><div class="muted">暂无可显示项。</div></div>`;
+        return;
+      }
+      rows.forEach((row) => {
+        const firstIssue = row.issues[0];
+        const hasIssue = Boolean(firstIssue);
+        const div = document.createElement("div");
+        div.className = `issue-item${STATE.selectedId === row.entry_id ? " active" : ""}`;
+        div.innerHTML = `
+          <div class="pill">${esc(row.entry_id)}</div>
+          <div class="entry-title">${esc(row.title)}</div>
+          <div class="muted" style="margin-top:4px;">${esc(row.meaning)}</div>
+          <div style="margin-top:8px;">
+            ${hasIssue
+              ? `<span class="pill ${firstIssue.level === "error" ? "err" : "warn"}">${esc(firstIssue.type)}</span>`
+              : `<span class="pill" style="background:#eaf7ea;color:var(--ok);">已匹配</span>`}
+          </div>
+        `;
+        div.addEventListener("click", () => {
+          STATE.selectedId = row.entry_id;
+          renderAll();
+        });
+        issueList.appendChild(div);
+      });
+    }
+
+    function renderExcelView() {
+      const rows = visibleRows();
+      excelView.innerHTML = "";
+      if (!rows.length) {
+        excelView.innerHTML = `<div class="excel-card"><div class="muted">暂无条目。</div></div>`;
+        return;
+      }
+      rows.forEach((row) => {
+        const div = document.createElement("div");
+        div.className = `excel-card${STATE.selectedId === row.entry_id ? " active" : ""}`;
+        const issueHtml = row.issues.map((it) =>
+          `<div class="${it.level === "error" ? "diff" : ""}" style="margin-top:8px;">` +
+          `<span class="pill ${it.level === "error" ? "err" : "warn"}">${esc(it.type)}</span> ${esc(it.message)}</div>`
+        ).join("");
+        const lines = row.excel_examples.map((line, idx) => `
+          <div class="line-pair">
+            <div><strong>${idx + 1}. JP:</strong> ${esc(line.jp)}</div>
+            <div><strong>ZH:</strong> ${esc(line.zh)}</div>
+          </div>
+        `).join("");
+        div.innerHTML = `
+          <div class="pill">${esc(row.entry_id)}</div>
+          <h3 class="entry-title">${esc(row.title)}</h3>
+          <div class="muted" style="margin-top:4px;">${esc(row.meaning)}</div>
+          <div style="font-size:${excelReadMode.checked ? "16px" : "13px"}; margin-top:8px;">
+            ${lines}
+          </div>
+          ${issueHtml}
+        `;
+        excelView.appendChild(div);
+      });
+    }
+
+    function renderAll() {
+      updateStats();
+      renderIssues();
+      renderExcelView();
+      renderPdfPreview();
+      updateProgress();
+    }
+
+    function ensureSelection(forceFirst = false) {
+      const rows = visibleRows();
+      if (!rows.length) {
+        STATE.selectedId = null;
+        return;
+      }
+      if (forceFirst || !rows.some((r) => r.entry_id === STATE.selectedId)) {
+        STATE.selectedId = rows[0].entry_id;
+      }
+    }
+
+    excelBtn.addEventListener("click", () => excelInput.click());
+    pdfBtn.addEventListener("click", () => pdfInput.click());
+
+    excelInput.addEventListener("change", () => {
+      STATE.excelFile = excelInput.files?.[0] || null;
+      excelName.textContent = STATE.excelFile ? STATE.excelFile.name : "未选择";
+      runBtn.disabled = !(STATE.excelFile && STATE.pdfFile);
+      setStatus(STATE.excelFile ? `已加载 Excel: ${STATE.excelFile.name}` : "等待上传 Excel 与 PDF。");
+    });
+
+    pdfInput.addEventListener("change", () => {
+      STATE.pdfFile = pdfInput.files?.[0] || null;
+      if (STATE.pdfObjectUrl) {
+        URL.revokeObjectURL(STATE.pdfObjectUrl);
+        STATE.pdfObjectUrl = null;
+      }
+      if (STATE.pdfFile) {
+        STATE.pdfObjectUrl = URL.createObjectURL(STATE.pdfFile);
+        STATE.currentPdfPage = 1;
+      } else {
+        STATE.currentPdfPage = null;
+      }
+      pdfName.textContent = STATE.pdfFile ? STATE.pdfFile.name : "未选择";
+      runBtn.disabled = !(STATE.excelFile && STATE.pdfFile);
+      setStatus(STATE.pdfFile ? `已加载 PDF: ${STATE.pdfFile.name}。若右侧空白，请点“新窗口打开PDF”。` : "等待上传 Excel 与 PDF。");
+      renderPdfPreview();
+    });
+
+    runBtn.addEventListener("click", async () => {
+      try {
+        setStatus("正在读取 Excel 条目并构建校对列表...");
+        const excelRows = await buildRowsFromExcel(STATE.excelFile);
+        STATE.rows = excelRows;
+        onlyIssue.checked = false;
+        resetRange();
+        ensureSelection(true);
+        renderAll();
+        exportBtn.disabled = false;
+        const first = STATE.rows[0];
+        setStatus(`已加载真实条目 ${STATE.rows.length} 条。第一条: ${first.title}`);
+      } catch (error) {
+        STATE.rows = JSON.parse(JSON.stringify(MOCK_COMPARE_RESULT));
+        resetRange();
+        ensureSelection(true);
+        renderAll();
+        exportBtn.disabled = false;
+        setStatus(`Excel 真实解析失败，已切换模拟数据: ${error.message}`);
+      }
+    });
+
+    exportBtn.addEventListener("click", () => {
+      if (!STATE.rows.length) return;
+      const payload = {
+        generated_at: new Date().toISOString(),
+        excel_file: STATE.excelFile?.name || null,
+        pdf_file: STATE.pdfFile?.name || null,
+        items: STATE.rows
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "pdf_excel_compare_result.json";
+      a.click();
+      URL.revokeObjectURL(url);
+      setStatus("已导出差异 JSON。");
+    });
+
+    onlyIssue.addEventListener("change", () => {
+      const count = getBaseRows().length;
+      if (STATE.rangeStart !== null || STATE.rangeEnd !== null) {
+        STATE.rangeStart = count ? 1 : null;
+        STATE.rangeEnd = count || null;
+        syncRangeInputs();
+      }
+      ensureSelection(true);
+      renderAll();
+    });
+    excelReadMode.addEventListener("change", renderExcelView);
+    applyRangeBtn.addEventListener("click", applyRangeFromInputs);
+    resetRangeBtn.addEventListener("click", resetRange);
+    startFromFirstBtn.addEventListener("click", () => {
+      ensureSelection(true);
+      renderAll();
+      setStatus("已从第一条开始校对。");
+    });
+    prevBtn.addEventListener("click", () => jumpRelative(-1));
+    nextBtn.addEventListener("click", () => jumpRelative(1));
+    goPageBtn.addEventListener("click", () => {
+      if (!STATE.pdfObjectUrl) return;
+      const page = Number.parseInt(pdfPageInput.value, 10);
+      if (!Number.isFinite(page) || page < 1) return;
+      STATE.currentPdfPage = page;
+      pdfFrame.src = "";
+      renderPdfPreview();
+    });
+    jumpToSelectedBtn.addEventListener("click", () => {
+      const selectedPage = detectPageForSelected();
+      if (!selectedPage) {
+        setStatus("当前条目没有可跳转的 PDF 页码。");
+        return;
+      }
+      STATE.currentPdfPage = selectedPage;
+      pdfFrame.src = "";
+      renderPdfPreview();
+    });
+
+    window.addEventListener("beforeunload", () => {
+      if (STATE.pdfObjectUrl) {
+        URL.revokeObjectURL(STATE.pdfObjectUrl);
+      }
+    });
+
+    syncRangeInputs();
+    renderAll();
+  </script>
+</body>
+</html>

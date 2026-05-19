@@ -30,4 +30,19 @@ python3 pdf_excel_proofread_server.py
 ## 关键文件
 - `pdf_excel_proofread_server.py`：后端服务
 - `pdf_excel_proofread_web.html`：前端页面
+- `grammar_lookup_web.html`：语法检索站前端页面
+- `dictionary.json` / `dictionary_data.js`：检索站静态数据
+- `build_dictionary_json.py`：从主 Excel 生成检索站静态数据
 - `render.yaml`：Render 部署配置
+
+## 目录结构
+- 根目录：
+  运行和部署相关文件，尽量保持扁平，主要包括两个站点入口、后端、静态数据、主 Excel、`render.yaml`
+- `docs/`：
+  项目说明和交接文档
+- `docs/reference-materials/`：
+  参考 PDF、拆分示例等只读资料
+- `archive/`：
+  旧备份文件，不参与当前部署
+- `scratch/`：
+  实验脚本、临时页面、MVP 文件

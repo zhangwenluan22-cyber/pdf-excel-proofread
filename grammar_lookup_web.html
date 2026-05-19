@@ -6,15 +6,18 @@
   <title>语法检索站</title>
   <style>
     :root {
-      --bg: #fbfaf7;
+      --bg: #f4f6f2;
       --panel: #ffffff;
-      --line: #eee8de;
-      --soft: #f5f2eb;
-      --text: #39414d;
-      --muted: #7e8794;
-      --accent: #ef8d7d;
-      --accent-soft: #fff2ee;
-      --shadow: 0 18px 50px rgba(62, 55, 46, 0.08);
+      --line: #dde4dd;
+      --soft: #edf1eb;
+      --text: #34403a;
+      --muted: #6f7b74;
+      --accent: #6d8a79;
+      --accent-strong: #567160;
+      --accent-soft: #ecf3ee;
+      --accent-line: #c7d5ca;
+      --accent-tint: rgba(109, 138, 121, 0.14);
+      --shadow: 0 18px 50px rgba(39, 50, 43, 0.07);
     }
     * { box-sizing: border-box; }
     body {
@@ -22,8 +25,8 @@
       font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
       color: var(--text);
       background:
-        radial-gradient(circle at top left, rgba(255, 237, 230, 0.9), transparent 24%),
-        linear-gradient(180deg, #fcfbf8 0%, #f7f4ee 100%);
+        radial-gradient(circle at top left, rgba(222, 233, 225, 0.88), transparent 24%),
+        linear-gradient(180deg, #f8faf7 0%, #eef2ec 100%);
       overflow: hidden;
     }
     .shell {
@@ -37,7 +40,7 @@
     }
     .hero {
       background: rgba(255, 255, 255, 0.82);
-      border: 1px solid rgba(239, 141, 125, 0.18);
+      border: 1px solid rgba(109, 138, 121, 0.18);
       border-radius: 28px;
       padding: 20px 24px 18px;
       box-shadow: var(--shadow);
@@ -66,10 +69,10 @@
       font-size: 13px;
     }
     .status {
-      color: #9a7d75;
+      color: #6f7e73;
       font-size: 13px;
-      background: #fff8f5;
-      border: 1px solid #f5d9d2;
+      background: #f4f8f4;
+      border: 1px solid #d8e3da;
       border-radius: 999px;
       padding: 7px 12px;
       white-space: nowrap;
@@ -78,12 +81,12 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      border: 2px solid rgba(239, 141, 125, 0.65);
+      border: 2px solid rgba(109, 138, 121, 0.45);
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.92);
       padding: 0 18px;
       min-height: 62px;
-      box-shadow: 0 10px 28px rgba(239, 141, 125, 0.08);
+      box-shadow: 0 10px 28px rgba(109, 138, 121, 0.08);
     }
     .search-filters {
       display: flex;
@@ -93,9 +96,9 @@
       margin-top: 12px;
     }
     .search-filter {
-      border: 1px solid #eadfd5;
+      border: 1px solid #dce3db;
       background: rgba(255, 255, 255, 0.8);
-      color: #8b817b;
+      color: #738078;
       border-radius: 999px;
       padding: 6px 12px;
       font-size: 12px;
@@ -104,10 +107,10 @@
       transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
     }
     .search-filter.active {
-      background: #fff1eb;
-      color: #bc5d4c;
-      border-color: #efc5bb;
-      box-shadow: inset 0 0 0 1px rgba(239, 141, 125, 0.14);
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+      border-color: var(--accent-line);
+      box-shadow: inset 0 0 0 1px var(--accent-tint);
     }
     .search-icon {
       color: var(--accent);
@@ -124,11 +127,11 @@
       font-size: clamp(20px, 2.2vw, 28px);
       color: #313844;
     }
-    #q::placeholder { color: #b3a7a2; }
+    #q::placeholder { color: #9ba59f; }
     .clear-btn {
       border: none;
       background: transparent;
-      color: #b99086;
+      color: #90a096;
       font-size: 28px;
       cursor: pointer;
       padding: 0;
@@ -148,13 +151,13 @@
     }
     .kana-title {
       font-size: 14px;
-      color: #8c776f;
+      color: #728078;
       font-weight: 700;
     }
     .kana-reset {
       border: none;
       background: transparent;
-      color: #ba786c;
+      color: #6d8a79;
       font: inherit;
       cursor: pointer;
       padding: 0;
@@ -166,26 +169,26 @@
       gap: 6px;
     }
     .kana-btn {
-      border: 1px solid #efe1d7;
+      border: 1px solid #dbe3db;
       background: rgba(255, 255, 255, 0.9);
       border-radius: 16px;
       padding: 8px 0;
       cursor: pointer;
-      color: #6d7684;
+      color: #67746d;
       font: inherit;
       font-weight: 700;
       transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
     }
     .kana-btn:hover {
       transform: translateY(-1px);
-      border-color: #efb1a6;
-      color: #bc6c5d;
+      border-color: #adc1b4;
+      color: var(--accent-strong);
     }
     .kana-btn.active {
       background: var(--accent-soft);
-      border-color: #ef9f91;
-      color: #bc5d4c;
-      box-shadow: inset 0 0 0 1px rgba(239, 141, 125, 0.15);
+      border-color: #9fb7a8;
+      color: var(--accent-strong);
+      box-shadow: inset 0 0 0 1px var(--accent-tint);
     }
     .workspace {
       display: grid;
@@ -197,7 +200,7 @@
     }
     .panel {
       background: rgba(255, 255, 255, 0.88);
-      border: 1px solid rgba(227, 218, 207, 0.92);
+      border: 1px solid rgba(214, 222, 214, 0.92);
       border-radius: 24px;
       box-shadow: var(--shadow);
       backdrop-filter: blur(10px);
@@ -233,7 +236,7 @@
       margin-left: auto;
     }
     .results-count {
-      color: #9e8d84;
+      color: #879389;
       font-size: 13px;
     }
     .depth-tabs {
@@ -241,14 +244,14 @@
       align-items: center;
       gap: 6px;
       padding: 4px;
-      border: 1px solid #eee2d7;
+      border: 1px solid #dde4dd;
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.9);
     }
     .depth-tab {
       border: none;
       background: transparent;
-      color: #8f837e;
+      color: #768279;
       border-radius: 999px;
       padding: 5px 10px;
       font: inherit;
@@ -258,9 +261,9 @@
       white-space: nowrap;
     }
     .depth-tab.active {
-      background: #fff1eb;
-      color: #bc5d4c;
-      box-shadow: inset 0 0 0 1px rgba(239, 141, 125, 0.18);
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+      box-shadow: inset 0 0 0 1px var(--accent-tint);
     }
     .list {
       overflow: auto;
@@ -271,14 +274,14 @@
     .tree-group,
     .tree-middle,
     .tree-entry {
-      border: 1px solid #efe7de;
+      border: 1px solid #e1e7e0;
       border-radius: 18px;
-      background: rgba(255, 251, 246, 0.92);
+      background: rgba(251, 252, 250, 0.94);
     }
     .tree-group {
-      border-left: 5px solid #e4a291;
+      border-left: 5px solid #9fb5a8;
       padding: 10px 12px 10px;
-      background: linear-gradient(180deg, #fffaf7 0%, #fffdfb 100%);
+      background: linear-gradient(180deg, #fafcf9 0%, #ffffff 100%);
     }
     .tree-group.leaf {
       cursor: pointer;
@@ -286,18 +289,18 @@
     }
     .tree-group.leaf:hover {
       transform: translateY(-1px);
-      border-color: #efc5bb;
-      box-shadow: 0 8px 18px rgba(97, 81, 66, 0.06);
+      border-color: #cdd8d0;
+      box-shadow: 0 8px 18px rgba(59, 73, 64, 0.06);
     }
     .tree-group.leaf.active {
-      background: linear-gradient(180deg, #fff7f4 0%, #fffdfb 100%);
-      border-color: #efb0a4;
-      box-shadow: 0 10px 24px rgba(239, 141, 125, 0.12);
+      background: linear-gradient(180deg, #f4f8f4 0%, #ffffff 100%);
+      border-color: #aac0b3;
+      box-shadow: 0 10px 24px rgba(109, 138, 121, 0.12);
     }
     .tree-middle {
       margin-top: 8px;
       margin-left: 12px;
-      border-left: 4px solid #e8c19b;
+      border-left: 4px solid #c7d0bd;
       padding: 8px 10px 8px;
       background: rgba(255, 255, 255, 0.9);
     }
@@ -307,31 +310,31 @@
     }
     .tree-middle.leaf:hover {
       transform: translateY(-1px);
-      border-color: #efc5bb;
-      box-shadow: 0 8px 18px rgba(97, 81, 66, 0.06);
+      border-color: #cdd8d0;
+      box-shadow: 0 8px 18px rgba(59, 73, 64, 0.06);
     }
     .tree-middle.leaf.active {
-      background: linear-gradient(180deg, #fff7f4 0%, #fffdfb 100%);
-      border-color: #efb0a4;
-      box-shadow: 0 10px 24px rgba(239, 141, 125, 0.12);
+      background: linear-gradient(180deg, #f4f8f4 0%, #ffffff 100%);
+      border-color: #aac0b3;
+      box-shadow: 0 10px 24px rgba(109, 138, 121, 0.12);
     }
     .tree-entry {
       margin-top: 8px;
       margin-left: 14px;
-      border-left: 3px solid #cfd7e3;
+      border-left: 3px solid #cfd8d3;
       padding: 9px 12px;
       cursor: pointer;
       transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
     }
     .tree-entry:hover {
       transform: translateY(-1px);
-      border-color: #efc5bb;
-      box-shadow: 0 8px 18px rgba(97, 81, 66, 0.06);
+      border-color: #cdd8d0;
+      box-shadow: 0 8px 18px rgba(59, 73, 64, 0.06);
     }
     .tree-entry.active {
-      background: linear-gradient(180deg, #fff7f4 0%, #fffdfb 100%);
-      border-color: #efb0a4;
-      box-shadow: 0 10px 24px rgba(239, 141, 125, 0.12);
+      background: linear-gradient(180deg, #f4f8f4 0%, #ffffff 100%);
+      border-color: #aac0b3;
+      box-shadow: 0 10px 24px rgba(109, 138, 121, 0.12);
     }
     .tree-summary {
       list-style: none;
@@ -376,6 +379,11 @@
       line-height: 1.4;
       letter-spacing: 0.01em;
       flex: 0 0 auto;
+    }
+    .tree-index-chip.big {
+      border-color: #8ea898;
+      background: #e4eee7;
+      color: #486353;
     }
     .tree-middle-line {
       display: flex;
@@ -475,31 +483,31 @@
       align-items: center;
       padding: 2px 7px;
       border-radius: 999px;
-      background: #fff6f1;
-      border: 1px solid #f2d7cc;
-      color: #b87364;
+      background: #f3f7f3;
+      border: 1px solid #d4dfd6;
+      color: #688171;
       font-size: 11px;
       font-weight: 700;
       line-height: 1.35;
       white-space: nowrap;
     }
     .item {
-      border: 1px solid #efe7de;
+      border: 1px solid #e1e7e0;
       border-radius: 18px;
-      background: rgba(250, 249, 247, 0.9);
+      background: rgba(248, 249, 246, 0.92);
       padding: 14px;
       cursor: pointer;
       transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
     }
     .item:hover {
       transform: translateY(-1px);
-      border-color: #efc5bb;
-      box-shadow: 0 8px 18px rgba(97, 81, 66, 0.06);
+      border-color: #cdd8d0;
+      box-shadow: 0 8px 18px rgba(59, 73, 64, 0.06);
     }
     .item.active {
-      background: linear-gradient(180deg, #fff7f4 0%, #fffdfb 100%);
-      border-color: #efb0a4;
-      box-shadow: 0 10px 24px rgba(239, 141, 125, 0.12);
+      background: linear-gradient(180deg, #f4f8f4 0%, #ffffff 100%);
+      border-color: #aac0b3;
+      box-shadow: 0 10px 24px rgba(109, 138, 121, 0.12);
     }
     .item-title {
       font-size: 18px;
@@ -534,7 +542,7 @@
       line-height: 1.8;
     }
     .detail-path {
-      color: #9b8f88;
+      color: #869288;
       font-size: 13px;
       margin-top: 8px;
     }
@@ -574,8 +582,8 @@
       margin-top: 24px;
     }
     .sec {
-      background: linear-gradient(180deg, rgba(250, 249, 246, 0.98) 0%, rgba(255, 255, 255, 0.98) 100%);
-      border: 1px solid #efe5dc;
+      background: linear-gradient(180deg, rgba(248, 249, 246, 0.98) 0%, rgba(255, 255, 255, 0.98) 100%);
+      border: 1px solid #e1e7e0;
       border-radius: 22px;
       padding: 16px 18px;
     }
@@ -630,7 +638,7 @@
       display: grid;
       gap: 2px;
       padding-left: 12px;
-      border-left: 3px solid #f0d8d1;
+      border-left: 3px solid #d8e2db;
     }
     .example-ja,
     .example-zh,
@@ -655,24 +663,24 @@
       line-height: 1.65;
     }
     .grammar-hit {
-      background: rgba(239, 141, 125, 0.18);
+      background: rgba(154, 182, 164, 0.24);
       color: inherit;
       border-radius: 6px;
       padding: 0 2px;
     }
     .search-hit {
-      background: rgba(255, 218, 132, 0.42);
+      background: rgba(230, 224, 188, 0.62);
       color: inherit;
       border-radius: 6px;
       padding: 0 2px;
-      box-shadow: inset 0 -1px 0 rgba(228, 160, 27, 0.22);
+      box-shadow: inset 0 -1px 0 rgba(165, 150, 96, 0.2);
     }
     .jump-chip {
       display: inline-flex;
       align-items: center;
-      border: 1px solid #efc0b6;
-      background: #fff7f4;
-      color: #c06655;
+      border: 1px solid #c8d6cc;
+      background: #f3f7f4;
+      color: #5f7b68;
       border-radius: 999px;
       padding: 6px 10px;
       font-size: 12px;
@@ -681,9 +689,9 @@
       cursor: pointer;
     }
     .guide-toggle {
-      border: 1px solid #efd5cb;
-      background: #fff8f4;
-      color: #b76857;
+      border: 1px solid #d4dfd6;
+      background: #f5f8f5;
+      color: #62796a;
       border-radius: 999px;
       padding: 6px 12px;
       font: inherit;
@@ -694,7 +702,7 @@
     }
     .guide-card {
       margin-top: 12px;
-      border-top: 1px solid #f1e6dd;
+      border-top: 1px solid #e3e9e2;
       padding-top: 14px;
       display: grid;
       gap: 14px;
@@ -1162,13 +1170,14 @@
       `;
     }
 
-    function renderTreeTitle(label, idx = "", titleClass = "tree-entry-title", highlight = false) {
+    function renderTreeTitle(label, idx = "", titleClass = "tree-entry-title", highlight = false, idxClass = "") {
       const safeLabel = highlight ? highlightText(label) : esc(label || "");
       const safeIdx = esc(String(idx || "").trim());
+      const chipClass = `tree-index-chip${idxClass ? ` ${idxClass}` : ""}`;
       return `
         <div class="tree-title-wrap">
+          ${safeIdx ? `<span class="${chipClass}">${safeIdx}</span>` : ""}
           <div class="${titleClass}">${safeLabel}</div>
-          ${safeIdx ? `<span class="tree-index-chip">${safeIdx}</span>` : ""}
         </div>
       `;
     }
@@ -1693,7 +1702,7 @@
           const groupLeafEl = document.createElement("div");
           groupLeafEl.className = `tree-group leaf${leafRow._id === S.active ? " active" : ""}`;
           groupLeafEl.innerHTML = `
-            ${renderLeafLine(renderTreeTitle(group.big, group.bigIdx, "tree-entry-title", !!S.query), resultSecondaryHtml(leafRow), "1 条", renderMatchTags(leafRow))}
+            ${renderLeafLine(renderTreeTitle(group.big, group.bigIdx, "tree-entry-title", !!S.query, "big"), resultSecondaryHtml(leafRow), "1 条", renderMatchTags(leafRow))}
           `;
           groupLeafEl.addEventListener("click", () => {
             S.active = leafRow._id;
@@ -1711,7 +1720,7 @@
         groupEl.open = S.expandDepth !== "big";
         groupEl.innerHTML = `
           <summary class="tree-summary">
-            ${renderTreeTitle(group.big, group.bigIdx, "tree-big-title", !!S.query)}
+            ${renderTreeTitle(group.big, group.bigIdx, "tree-big-title", !!S.query, "big")}
             <div class="tree-badge">${groupCount} 条</div>
           </summary>
         `;

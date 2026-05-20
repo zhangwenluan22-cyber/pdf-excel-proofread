@@ -1768,6 +1768,55 @@
       return String(text).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     }
 
+    const AGARU_COMPOUND_STEMS = [
+      "立ち", "かけ", "駆け", "のし", "はげ", "持ち", "ふくれ", "膨れ",
+      "舞い", "思い", "干", "ふるえ", "震え", "縮み", "のぼせ",
+      "焼き", "でき", "出来", "ゆで", "茹で", "刷り", "仕上", "仕",
+      "跳ね", "飛び", "這い", "這", "起き", "盛り", "込み", "込み"
+    ];
+
+    const AGARU_ENDINGS = [
+      "っています", "っていました", "っている", "っていた", "ったら", "ったり",
+      "った", "って", "ります", "りました", "らない", "らず", "れば",
+      "ろう", "り", "る", "ら", "れ", "ろ"
+    ];
+
+    function buildAgaruCompoundRegex(candidate) {
+      if (!["あがる", "上がる"].includes(candidate)) return null;
+      const stems = [...new Set(AGARU_COMPOUND_STEMS)]
+        .filter(Boolean)
+        .sort((a, b) => b.length - a.length)
+        .map(escapeRegExp)
+        .join("|");
+      const endings = AGARU_ENDINGS
+        .sort((a, b) => b.length - a.length)
+        .map(escapeRegExp)
+        .join("|");
+      return new RegExp(`(?:${stems})(?:あが|上が)(?:${endings})`, "g");
+    }
+
+    function verbEndingForms(lastKana, ichidan = false) {
+      if (ichidan) {
+        return [
+          "ています", "ていました", "ている", "ていた", "ました", "ません",
+          "たら", "たり", "ない", "ます", "れば", "よう", "られる", "れる",
+          "させる", "たい", "た", "て", "る", "れ", "ろ"
+        ];
+      }
+      const forms = {
+        "う": ["っています", "っていました", "っている", "っていた", "ったら", "ったり", "った", "って", "います", "いました", "わない", "わず", "えば", "おう", "う", "い", "わ", "え"],
+        "く": ["いています", "いていました", "いている", "いていた", "いたら", "いたり", "いた", "いて", "きます", "きました", "かない", "かず", "けば", "こう", "く", "き", "か", "け"],
+        "ぐ": ["いでいます", "いでいました", "いでいる", "いでいた", "いだら", "いだり", "いだ", "いで", "ぎます", "ぎました", "がない", "がず", "げば", "ごう", "ぐ", "ぎ", "が", "げ"],
+        "す": ["しています", "していました", "している", "していた", "したら", "したり", "した", "して", "します", "しました", "さない", "さず", "せば", "そう", "す", "し", "さ", "せ"],
+        "つ": ["っています", "っていました", "っている", "っていた", "ったら", "ったり", "った", "って", "ちます", "ちました", "たない", "たず", "てば", "とう", "つ", "ち", "た", "て"],
+        "ぬ": ["んでいます", "んでいました", "んでいる", "んでいた", "んだら", "んだり", "んだ", "んで", "にます", "にました", "なない", "なず", "ねば", "のう", "ぬ", "に", "な", "ね"],
+        "ぶ": ["んでいます", "んでいました", "んでいる", "んでいた", "んだら", "んだり", "んだ", "んで", "びます", "びました", "ばない", "ばず", "べば", "ぼう", "ぶ", "び", "ば", "べ"],
+        "む": ["んでいます", "んでいました", "んでいる", "んでいた", "んだら", "んだり", "んだ", "んで", "みます", "みました", "まない", "まず", "めば", "もう", "む", "み", "ま", "め"],
+        "る": ["っています", "っていました", "っている", "っていた", "ったら", "ったり", "った", "って", "ります", "りました", "らない", "らず", "れば", "ろう", "る", "り", "ら", "れ", "ろ"]
+      };
+      return forms[lastKana] || null;
+    }
+
     function buildInflectionRegex(candidate) {
       if (!candidate || candidate.length < 2) return null;
       const suffixMatch = candidate.match(/[ぁ-ゖァ-ヺー]+$/);
@@ -1777,28 +1826,14 @@
       const prefix = candidate.slice(0, -1);
       if (!prefix) return null;
 
-      const groups = {
-        "う": ["う", "い", "わ", "え", "お", "っ"],
-        "く": ["く", "き", "か", "け", "こ", "い"],
-        "ぐ": ["ぐ", "ぎ", "が", "げ", "ご", "い"],
-        "す": ["す", "し", "さ", "せ", "そ"],
-        "つ": ["つ", "ち", "た", "て", "と", "っ"],
-        "ぬ": ["ぬ", "に", "な", "ね", "の", "ん"],
-        "ぶ": ["ぶ", "び", "ば", "べ", "ぼ", "ん"],
-        "む": ["む", "み", "ま", "め", "も", "ん"],
-        "る": ["る", "り", "ら", "れ", "ろ", "よ", "っ"],
-        "る_ichidan": ["る", "れ", "ろ", "よ", "た", "て"]
-      };
-
-      let forms = null;
-      if (lastKana === "る" && /[いえ]る$/.test(candidate)) {
-        forms = groups["る_ichidan"];
-      } else {
-        forms = groups[lastKana];
-      }
+      const forms = verbEndingForms(lastKana, lastKana === "る" && /[いえ]る$/.test(candidate));
       if (!forms) return null;
 
-      return new RegExp(`${escapeRegExp(prefix)}(?:${forms.join("|")})[ぁ-ゖァ-ヺー]*`, "g");
+      const endings = [...new Set(forms)]
+        .sort((a, b) => b.length - a.length)
+        .map(escapeRegExp)
+        .join("|");
+      return new RegExp(`${escapeRegExp(prefix)}(?:${endings})`, "g");
     }
 
     function buildCompoundInflectionRegex(candidate) {
@@ -1817,7 +1852,19 @@
 
       candidates.forEach((candidate) => {
         if (!candidate) return;
-        const compoundRegex = buildCompoundInflectionRegex(candidate);
+        const knownCompoundRegex = buildAgaruCompoundRegex(candidate);
+        if (knownCompoundRegex) {
+          const knownCompoundKey = `compound-known:${candidate}`;
+          if (!seen.has(knownCompoundKey)) {
+            seen.add(knownCompoundKey);
+            matchers.push({
+              key: knownCompoundKey,
+              regex: knownCompoundRegex
+            });
+          }
+        }
+
+        const compoundRegex = knownCompoundRegex ? null : buildCompoundInflectionRegex(candidate);
         if (compoundRegex) {
           const compoundKey = `compound:${candidate}`;
           if (!seen.has(compoundKey)) {
@@ -1915,21 +1962,229 @@
       return highlightHtmlPreservingTags(html);
     }
 
+    function renderHighlightedText(text, highlights, className = "grammar-hit") {
+      const raw = String(text ?? "");
+      const terms = [...new Set((Array.isArray(highlights) ? highlights : [])
+        .map((item) => String(item || "").trim())
+        .filter(Boolean))]
+        .sort((a, b) => b.length - a.length);
+      if (!raw || !terms.length) return esc(raw);
+
+      let working = raw;
+      const tokens = [];
+      terms.forEach((term, idx) => {
+        if (!working.includes(term)) return;
+        working = working.replace(new RegExp(escapeRegExp(term), "g"), () => {
+          const token = `__EXAMPLE_HIGHLIGHT_${idx}_${tokens.length}__`;
+          tokens.push({ token, term });
+          return token;
+        });
+      });
+
+      let html = esc(working);
+      tokens.forEach(({ token, term }) => {
+        html = html.replaceAll(token, `<mark class="${className}">${esc(term)}</mark>`);
+      });
+      return html;
+    }
+
     function classifyExampleLine(line) {
       if (looksJapanese(line)) return "example-ja";
       if (/[\u4e00-\u9fff]/.test(line)) return "example-zh";
       return "example-mixed";
     }
 
+    function normalizeExampleKey(text) {
+      return String(text ?? "")
+        .normalize("NFKC")
+        .replace(/[，,]/g, "、")
+        .replace(/\s+/g, "")
+        .replace(/[。、.]+$/g, "")
+        .trim();
+    }
+
+    const EXAMPLE_HIGHLIGHT_OVERRIDES = new Map([
+      [normalizeExampleKey("彼は立ち上がってあたりを見回した。"), ["立ち上がって"]],
+      [normalizeExampleKey("妹は帰ってくるなり階段を一気にかけ上がって、自分の部屋に飛び込んだ。"), ["かけ上がって"]],
+      [normalizeExampleKey("彼女はライバルを押しのけて、スターの座にのしあがった。"), ["のしあがった"]],
+      [normalizeExampleKey("政治学の先生はひたいがはげ上がっている。"), ["はげ上がっている"]],
+      [normalizeExampleKey("冬休みにみんなで温泉に行こうという計画が持ち上がった。"), ["持ち上がった"]],
+      [normalizeExampleKey("大事なお客さんが来るので、母は家中をぴかぴかにみがき上げた。"), ["みがき上げた"]],
+      [normalizeExampleKey("彼は原稿用紙500枚の小説を一気に書き上げた。"), ["書き上げた"]],
+      [normalizeExampleKey("クリスマスまでえに何とかセーターを編み上げてプレゼントしようと思っていたのに。"), ["編み上げて"]],
+      [normalizeExampleKey("刑事は犯人をロープで身動きできないようにしばり上げた。"), ["しばり上げた"]],
+      [normalizeExampleKey("みんなで一晩中かかってまとめ上げたデータが何者かに盗まれた。"), ["まとめ上げた"]],
+      [normalizeExampleKey("この織物は草や木の根などを集めてきて染めた糸で丹念に織り上げたものだ。"), ["織り上げた"]],
+      [normalizeExampleKey("何年もかかって築き上げてきた信頼が、たった一度の過ちで崩れてしまった。"), ["築き上げてきた"]]
+    ]);
+
+    function explicitHighlightsForExample(example) {
+      const ownHighlights = Array.isArray(example?.highlights) ? example.highlights : [];
+      if (ownHighlights.length) return ownHighlights;
+      return EXAMPLE_HIGHLIGHT_OVERRIDES.get(normalizeExampleKey(example?.ja)) || [];
+    }
+
+    const GRAMMAR_CONNECTOR_MARKERS = [
+      "A-かったろう", "V-ただろう", "V-られる", "V-させる",
+      "A-くない", "A-ければ", "A-かった", "V-れる",
+      "A-かろう", "A-くて", "V-ない", "V-よう",
+      "A-い", "A-く", "V-る", "V-た", "V-て", "V-ば",
+      "Na", "N", "V", "R", "A-"
+    ];
+
+    function stripPatternPlaceholders(text) {
+      return String(text || "")
+        .replace(/[.…]+/g, "")
+        .replace(/^[\s\-‐‑‒–—―−﹣－／/]+/g, "")
+        .replace(/(?:N|Na|A-|A-い|A-く|A-くない|A-くて|A-かった|A-かろう|A-かったろう|A-ければ|V|R|V-る|V-た|V-ただろう|V-ない|V-て|V-ば|V-よう|V-れる|V-られる|V-させる)$/g, "")
+        .trim();
+    }
+
+    function splitGrammarConnectorPattern(title) {
+      const source = String(title || "").trim();
+      for (const marker of GRAMMAR_CONNECTOR_MARKERS) {
+        if (source.startsWith(marker)) {
+          const fixed = stripPatternPlaceholders(source.slice(marker.length));
+          if (fixed) return { marker, fixed };
+        }
+      }
+      return null;
+    }
+
+    function fixedPatternVariants(fixed) {
+      return expandHighlightVariants(fixed)
+        .map((item) => item.replace(/\s+/g, ""))
+        .filter((item) => item.length >= 2)
+        .sort((a, b) => b.length - a.length);
+    }
+
+    function shortJapanesePrefixRegex(kind) {
+      const word = "[ぁ-ゖァ-ヺー一-龯々〆〤ヶ]";
+      const short = `${word}{1,10}`;
+      const veryShort = `${word}{1,8}`;
+      const patterns = {
+        "V": `${short}(?:う|く|ぐ|す|つ|ぬ|ぶ|む|る)`,
+        "V-る": `${short}(?:う|く|ぐ|す|つ|ぬ|ぶ|む|る)`,
+        "V-た": `${short}(?:した|った|いた|いだ|んだ|えた|けた|げた|せた|てた|べた|めた|れた|た)`,
+        "V-ただろう": `${short}(?:した|った|いた|いだ|んだ|えた|けた|げた|せた|てた|べた|めた|れた|た)だろう`,
+        "V-ない": `${short}(?:ない|わない|かない|がない|さない|たない|なない|ばない|まない|らない)`,
+        "V-て": `${short}(?:して|って|いて|いで|んで|えて|けて|げて|せて|てて|べて|めて|れて|て)`,
+        "V-ば": `${short}(?:えば|けば|げば|せば|てば|ねば|べば|めば|れば|ば)`,
+        "V-よう": `${short}(?:よう|おう|こう|ごう|そう|とう|のう|ぼう|もう|ろう)`,
+        "V-れる": `${short}(?:れる|られる|える|ける|げる|せる|てる|べる|める)`,
+        "V-られる": `${short}(?:られる|される)`,
+        "V-させる": `${short}(?:させる|せる)`,
+        "R": `${veryShort}(?:い|き|ぎ|し|ち|に|び|み|り|え|け|げ|せ|て|べ|め|れ)`,
+        "A-": `${veryShort}`,
+        "A-い": `${veryShort}い`,
+        "A-く": `${veryShort}く`,
+        "A-くない": `${veryShort}くない`,
+        "A-くて": `${veryShort}くて`,
+        "A-かった": `${veryShort}かった`,
+        "A-かろう": `${veryShort}かろう`,
+        "A-かったろう": `${veryShort}かったろう`,
+        "A-ければ": `${veryShort}ければ`
+      };
+      return patterns[kind] || "";
+    }
+
+    const GRAMMAR_PATTERN_BOUNDARY = "(?:^|[\\s、。！？「『（(]|から|まで|より|[はがをにでとへもやの])";
+
+    function trimPatternHitToBoundary(hit, fixed) {
+      const text = String(hit || "");
+      const fixedIndex = text.lastIndexOf(fixed);
+      if (fixedIndex <= 0) return text;
+      const before = text.slice(0, fixedIndex);
+      const boundaryIndex = Math.max(
+        before.lastIndexOf("は"),
+        before.lastIndexOf("が"),
+        before.lastIndexOf("を"),
+        before.lastIndexOf("に"),
+        before.lastIndexOf("で"),
+        before.lastIndexOf("と"),
+        before.lastIndexOf("へ"),
+        before.lastIndexOf("も"),
+        before.lastIndexOf("や"),
+        before.lastIndexOf("の")
+      );
+      if (boundaryIndex < 0) return text;
+      const trimmed = text.slice(boundaryIndex + 1);
+      return trimmed.length > fixed.length ? trimmed : text;
+    }
+
+    function collectGrammarPatternHighlights(line, row) {
+      if (!looksJapanese(line)) return [];
+      const c = row?.cells || {};
+      const titles = [c["小条目"], c["中条目"], mainLabel(row), c["大条目"]].filter(Boolean);
+      const hits = new Set();
+
+      titles.forEach((title) => {
+        const pattern = splitGrammarConnectorPattern(title);
+        if (!pattern) return;
+        const fixedVariants = fixedPatternVariants(pattern.fixed);
+        if (!fixedVariants.length) return;
+
+        fixedVariants.forEach((fixed) => {
+          if (pattern.marker === "N" || pattern.marker === "Na") {
+            if (line.includes(fixed)) hits.add(fixed);
+            return;
+          }
+
+          const prefixPattern = shortJapanesePrefixRegex(pattern.marker);
+          if (!prefixPattern) return;
+          const regex = new RegExp(`${GRAMMAR_PATTERN_BOUNDARY}(${prefixPattern}${escapeRegExp(fixed)})`, "g");
+          line.replace(regex, (_match, hit) => {
+            hits.add(trimPatternHitToBoundary(hit, fixed));
+            return _match;
+          });
+        });
+      });
+
+      return [...hits].sort((a, b) => b.length - a.length);
+    }
+
+    function normalizeStructuredExamples(value) {
+      if (!Array.isArray(value)) return [];
+      return value
+        .map((item) => ({
+          ja: String(item?.ja || "").trim(),
+          zh: String(item?.zh || "").trim(),
+          highlights: Array.isArray(item?.highlights) ? item.highlights : []
+        }))
+        .filter((item) => item.ja || item.zh);
+    }
+
     function renderExamples(text, row) {
-      if (!text || !String(text).trim()) return "";
       const highlightCandidates = extractHighlightCandidates(row);
-      const blocks = String(text)
-        .split(/\n\s*\n+/)
-        .map((block) => block.trim())
-        .filter(Boolean);
+      const c = row?.cells || {};
+      const structuredExamples = normalizeStructuredExamples(c.examples || c["examples"] || row?.examples);
+      const blocks = structuredExamples.length
+        ? structuredExamples
+        : String(text || "")
+            .split(/\n\s*\n+/)
+            .map((block) => block.trim())
+            .filter(Boolean);
+      if (!blocks.length) return "";
 
       const items = blocks.map((block) => {
+        if (typeof block === "object") {
+          const highlights = explicitHighlightsForExample(block);
+          const grammarPatternHighlights = !highlights.length
+            ? collectGrammarPatternHighlights(block.ja, row)
+            : [];
+          const jaHtml = block.ja
+            ? `<p class="example-ja">${
+                highlights.length
+                  ? highlightHtmlPreservingTags(renderHighlightedText(block.ja, highlights))
+                  : grammarPatternHighlights.length
+                    ? highlightHtmlPreservingTags(renderHighlightedText(block.ja, grammarPatternHighlights))
+                    : highlightExampleLine(block.ja, highlightCandidates)
+              }</p>`
+            : "";
+          const zhHtml = block.zh ? `<p class="example-zh">${highlightText(block.zh)}</p>` : "";
+          return `<article class="example-item">${jaHtml}${zhHtml}</article>`;
+        }
+
         const lines = block.split("\n").map((line) => line.trim()).filter(Boolean);
         const mergedLines = [];
 
@@ -1943,9 +2198,21 @@
           mergedLines.push({ klass, text: line });
         });
 
+        const example = {
+          ja: mergedLines.find((item) => item.klass === "example-ja")?.text || "",
+          highlights: []
+        };
+        const explicitHighlights = explicitHighlightsForExample(example);
         const html = mergedLines.map(({ klass, text: mergedText }) => {
+          const grammarPatternHighlights = klass === "example-ja" && !explicitHighlights.length
+            ? collectGrammarPatternHighlights(mergedText, row)
+            : [];
           const content = klass === "example-ja"
-            ? highlightExampleLine(mergedText, highlightCandidates)
+            ? explicitHighlights.length
+              ? highlightHtmlPreservingTags(renderHighlightedText(mergedText, explicitHighlights))
+              : grammarPatternHighlights.length
+                ? highlightHtmlPreservingTags(renderHighlightedText(mergedText, grammarPatternHighlights))
+                : highlightExampleLine(mergedText, highlightCandidates)
             : highlightText(mergedText);
           return `<p class="${klass}">${content}</p>`;
         }).join("");
